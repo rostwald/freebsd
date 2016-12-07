@@ -11525,7 +11525,7 @@ handle_written_inodeblock(inodedep, bp, flags)
 		panic("handle_written_inodeblock: bad size");
 	if (inodedep->id_savednlink > LINK_MAX)
 		panic("handle_written_inodeblock: Invalid link count "
-		    "%d for inodedep %p", inodedep->id_savednlink, inodedep);
+		    "%jd for inodedep %p", inodedep->id_savednlink, inodedep);
 	if (fstype == UFS1) {
 		if (dp1->di_nlink != inodedep->id_savednlink) { 
 			dp1->di_nlink = inodedep->id_savednlink;
@@ -14271,7 +14271,7 @@ softdep_error(func, error)
 static void
 inodedep_print(struct inodedep *inodedep, int verbose)
 {
-	db_printf("%p fs %p st %x ino %jd inoblk %jd delta %d nlink %d"
+	db_printf("%p fs %p st %x ino %jd inoblk %jd delta %jd nlink %jd"
 	    " saveino %p\n",
 	    inodedep, inodedep->id_fs, inodedep->id_state,
 	    (intmax_t)inodedep->id_ino,

@@ -684,9 +684,9 @@ lbn_offset(struct fs *fs, int level)
 /*
  * Size of the segment record header.  There is at most one for each disk
  * block in the journal.  The segment header is followed by an array of
- * records.  fsck depends on the first element in each record being 'op'
- * and the second being 'ino'.  Segments may span multiple disk blocks but
- * the header is present on each.
+ * records.  fsck depends on having the 'op' element and the 'ino' element
+ * being at the same offset in every record.  Segments may span multiple
+ * disk blocks but the header is present on each.
  */
 struct jsegrec {
 	uint64_t	jsr_seq;	/* Our sequence number */
@@ -701,13 +701,12 @@ struct jsegrec {
  * Reference record.  Records a single link count modification.
  */
 struct jrefrec {
-	uint32_t	jr_op;
-	uint32_t	jr_ino;
-	uint32_t	jr_parent;
-	uint16_t	jr_nlink;
+	uint16_t	jr_op;
 	uint16_t	jr_mode;
-	int64_t		jr_diroff;
-	uint64_t	jr_unused;
+	uint32_t	jr_diroff;	/* XXX should be off_t */
+	ino_t		jr_ino;
+	ino_t		jr_parent;
+	nlink_t		jr_nlink;
 };
 
 /*
@@ -715,12 +714,13 @@ struct jrefrec {
  * nlink is unchanged but we must search both locations.
  */
 struct jmvrec {
-	uint32_t	jm_op;
-	uint32_t	jm_ino;
-	uint32_t	jm_parent;
-	uint16_t	jm_unused;
-	int64_t		jm_oldoff;
-	int64_t		jm_newoff;
+	uint16_t	jm_op;
+	uint16_t	jm_unused1;
+	uint32_t	jm_unused2;
+	ino_t		jm_ino;
+	ino_t		jm_parent;
+	uint32_t	jm_oldoff;
+	uint32_t	jm_newoff;
 };
 
 /*
@@ -728,13 +728,13 @@ struct jmvrec {
  * freed or a set of frags are allocated.
  */
 struct jblkrec {
-	uint32_t	jb_op;
-	uint32_t	jb_ino;
-	ufs2_daddr_t	jb_blkno;
-	ufs_lbn_t	jb_lbn;
+	uint16_t	jb_op;
 	uint16_t	jb_frags;
 	uint16_t	jb_oldfrags;
-	uint32_t	jb_unused;
+	uint16_t	jb_unused;
+	ino_t		jb_ino;
+	ufs2_daddr_t	jb_blkno;
+	ufs_lbn_t	jb_lbn;
 };
 
 /*
@@ -742,11 +742,12 @@ struct jblkrec {
  * completed at check time.  Also used for sync records.
  */
 struct jtrncrec {
-	uint32_t	jt_op;
-	uint32_t	jt_ino;
-	int64_t		jt_size;
+	uint16_t	jt_op;
+	uint16_t	jt_unused1;
 	uint32_t	jt_extsize;
-	uint32_t	jt_pad[3];
+	ino_t		jt_ino;
+	off_t		jt_size;
+	uint64_t	jt_unused2;
 };
 
 union jrec {

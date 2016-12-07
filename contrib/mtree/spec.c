@@ -363,7 +363,7 @@ dump_nodes(FILE *fp, const char *dir, NODE *root, int pathlast)
 			appendfield(fp, pathlast, "device=%#jx",
 			    (uintmax_t)cur->st_rdev);
 		if (MATCHFLAG(F_NLINK))
-			appendfield(fp, pathlast, "nlink=%d", cur->st_nlink);
+			appendfield(fp, pathlast, "nlink=%ju", cur->st_nlink);
 		if (MATCHFLAG(F_SLINK))
 			appendfield(fp, pathlast, "link=%s",
 			    vispath(cur->slink));

@@ -1347,8 +1347,8 @@ ino_adjust(struct suj_ino *sino)
 	struct suj_ino *stmp;
 	union dinode *ip;
 	nlink_t nlink;
+	nlink_t reqlink;
 	int recmode;
-	int reqlink;
 	int isdot;
 	int mode;
 	ino_t ino;
@@ -1399,7 +1399,7 @@ ino_adjust(struct suj_ino *sino)
 		err_suj("ino %ju nlink manipulation error, new %d, old %d\n",
 		    (uintmax_t)ino, nlink, DIP(ip, di_nlink));
 	if (debug)
-		printf("Adjusting ino %ju, nlink %d, old link %d lastmode %o\n",
+	       printf("Adjusting ino %ju, nlink %ju, old link %d lastmode %o\n",
 		    (uintmax_t)ino, nlink, DIP(ip, di_nlink), sino->si_mode);
 	if (mode == 0) {
 		if (debug)
@@ -1419,7 +1419,7 @@ ino_adjust(struct suj_ino *sino)
 	/* If the inode doesn't have enough links to live, free it. */
 	if (nlink < reqlink) {
 		if (debug)
-			printf("ino %ju not enough links to live %d < %d\n",
+			printf("ino %ju not enough links to live %ju < %ju\n",
 			    (uintmax_t)ino, nlink, reqlink);
 		ino_reclaim(ip, ino, mode);
 		return;
@@ -1633,9 +1633,9 @@ ino_check(struct suj_ino *sino)
 	struct suj_rec *srec;
 	struct jrefrec *rrec;
 	nlink_t dotlinks;
-	int newlinks;
-	int removes;
-	int nlink;
+	nlink_t newlinks;
+	nlink_t removes;
+	nlink_t nlink;
 	ino_t ino;
 	int isdot;
 	int isat;
@@ -1657,8 +1657,8 @@ ino_check(struct suj_ino *sino)
 			err_suj("Inode mode/directory type mismatch %o != %o\n",
 			    mode, rrec->jr_mode);
 		if (debug)
-			printf("jrefrec: op %d ino %ju, nlink %d, parent %d, "
-			    "diroff %jd, mode %o, isat %d, isdot %d\n",
+			printf("jrefrec: op %d ino %ju, nlink %ju, parent %ju, "
+			    "diroff %d, mode %o, isat %d, isdot %d\n",
 			    rrec->jr_op, (uintmax_t)rrec->jr_ino,
 			    rrec->jr_nlink, rrec->jr_parent, rrec->jr_diroff,
 			    rrec->jr_mode, isat, isdot);
@@ -1677,7 +1677,8 @@ ino_check(struct suj_ino *sino)
 	 * by one.
 	 */
 	if (debug)
-		printf("ino %ju nlink %d newlinks %d removes %d dotlinks %d\n",
+		printf(
+		    "ino %ju nlink %ju newlinks %ju removes %ju dotlinks %ju\n",
 		    (uintmax_t)ino, nlink, newlinks, removes, dotlinks);
 	nlink += newlinks;
 	nlink -= removes;
@@ -1962,13 +1963,13 @@ ino_append(union jrec *rec)
 	mvrec = &rec->rec_jmvrec;
 	refrec = &rec->rec_jrefrec;
 	if (debug && mvrec->jm_op == JOP_MVREF)
-		printf("ino move: ino %d, parent %d, diroff %jd, oldoff %jd\n",
+		printf("ino move: ino %ju, parent %ju, diroff %d, oldoff %d\n",
 		    mvrec->jm_ino, mvrec->jm_parent, mvrec->jm_newoff,
 		    mvrec->jm_oldoff);
 	else if (debug &&
 	    (refrec->jr_op == JOP_ADDREF || refrec->jr_op == JOP_REMREF))
-		printf("ino ref: op %d, ino %d, nlink %d, "
-		    "parent %d, diroff %jd\n",
+		printf("ino ref: op %d, ino %ju, nlink %ju, "
+		    "parent %ju, diroff %d\n",
 		    refrec->jr_op, refrec->jr_ino, refrec->jr_nlink,
 		    refrec->jr_parent, refrec->jr_diroff);
 	sino = ino_lookup(((struct jrefrec *)rec)->jr_ino, 1);
@@ -2182,7 +2183,7 @@ blk_build(struct jblkrec *blkrec)
 
 	if (debug)
 		printf("blk_build: op %d blkno %jd frags %d oldfrags %d "
-		    "ino %d lbn %jd\n",
+		    "ino %ju lbn %jd\n",
 		    blkrec->jb_op, blkrec->jb_blkno, blkrec->jb_frags,
 		    blkrec->jb_oldfrags, blkrec->jb_ino, blkrec->jb_lbn);
 
@@ -2232,7 +2233,7 @@ ino_build_trunc(struct jtrncrec *rec)
 	struct suj_ino *sino;
 
 	if (debug)
-		printf("ino_build_trunc: op %d ino %d, size %jd\n",
+		printf("ino_build_trunc: op %d ino %ju, size %jd\n",
 		    rec->jt_op, rec->jt_ino, rec->jt_size);
 	sino = ino_lookup(rec->jt_ino, 1);
 	if (rec->jt_op == JOP_SYNC) {
