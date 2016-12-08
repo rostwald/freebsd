@@ -1253,7 +1253,7 @@ file_compress(char *file, char *outfile, size_t outsize)
 #ifndef SMALL
 		if (isb.st_nlink > 1 && fflag == 0) {
 			maybe_warnx("%s has %ju other link%s -- skipping",
-			    file, isb.st_nlink - 1,
+			    file, (uintmax_t)isb.st_nlink - 1,
 			    (isb.st_nlink - 1) == 1 ? "" : "s");
 			close(in);
 			return (-1);
@@ -1449,7 +1449,7 @@ file_uncompress(char *file, char *outfile, size_t outsize)
 #ifndef SMALL
 		if (isb.st_nlink > 1 && lflag == 0 && fflag == 0) {
 			maybe_warnx("%s has %ju other links -- skipping",
-			    file, isb.st_nlink - 1);
+			    file, (uintmax_t)isb.st_nlink - 1);
 			goto lose;
 		}
 		if (nflag == 0 && timestamp)

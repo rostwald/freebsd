@@ -3135,7 +3135,7 @@ nfs_print(struct vop_print_args *ap)
 	struct vnode *vp = ap->a_vp;
 	struct nfsnode *np = VTONFS(vp);
 
-	printf("\tfileid %ld fsid 0x%jx", np->n_vattr.na_fileid,
+	printf("\tfileid %ld fsid 0x%jx", (uintmax_t)np->n_vattr.na_fileid,
 	    np->n_vattr.na_fsid);
 	if (vp->v_type == VFIFO)
 		fifo_printinfo(vp);
