@@ -373,21 +373,8 @@ FBSD_1.3 {
 };
 
 FBSD_1.4 {
-	fhstat;
-	fhstatfs;
-	fstat;
-	fstatat;
-	fstatfs;
 	futimens;
-	getdents;
-	getdirentries;
-	getfsstat;
-	lstat;
-	mknod;
-	mknodat;
 	ppoll;
-	stat;
-	statfs;
 	utimensat;
 	numa_setaffinity;
 	numa_getaffinity;
@@ -396,7 +383,20 @@ FBSD_1.4 {
 };
 
 FBSD_1.5 {
-	 fdatasync;
+	fdatasync;
+	fhstat;
+	fhstatfs;
+	fstat;
+	fstatat;
+	fstatfs;
+	getdents;
+	getdirentries;
+	getfsstat;
+	lstat;
+	mknod;
+	mknodat;
+	stat;
+	statfs;
 };
 
 FBSDprivate_1.0 {

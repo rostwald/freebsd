@@ -385,9 +385,19 @@ FBSD_1.3 {
 };
 
 FBSD_1.4 {
+	getnetgrent_r;
+	pthread_mutex_consistent;
+	pthread_mutexattr_getrobust;
+	pthread_mutexattr_setrobust;
+	stravis;
+};
+
+FBSD_1.5 {
 	alphasort;
+	basename;
 	devname;
 	devname_r;
+	dirname;
 	fts_children;
 	fts_close;
 	fts_get_clientptr;
@@ -398,23 +408,13 @@ FBSD_1.4 {
 	fts_set_clientptr;
 	ftw;
 	getmntinfo;
-	getnetgrent_r;
 	glob;
 	globfree;
 	nftw;
-	pthread_mutex_consistent;
-	pthread_mutexattr_getrobust;
-	pthread_mutexattr_setrobust;
 	readdir;
 	readdir_r;
 	scandir;
 	scandir_b;
-	stravis;
-};
-
-FBSD_1.5 {
-	basename;
-	dirname;
 };
 
 FBSDprivate_1.0 {
