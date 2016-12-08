@@ -1,1 +1,2 @@
 lib/libc/gen: scandir_b
+everything: %jd
