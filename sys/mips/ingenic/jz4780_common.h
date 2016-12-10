@@ -1,6 +1,10 @@
 /*-
- * Copyright (c) 2012 Gleb Smirnoff <glebius@FreeBSD.org>
+ * Copyright (c) 2016 Ruslan Bukin <br@bsdpad.com>
  * All rights reserved.
+ *
+ * This software was developed by SRI International and the University of
+ * Cambridge Computer Laboratory under DARPA/AFRL contract FA8750-10-C-0237
+ * ("CTSRD"), as part of the DARPA CRASH research programme.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,51 +30,7 @@
  * $FreeBSD$
  */
 
-#ifndef __SYS_COUNTER_H__
-#define __SYS_COUNTER_H__
-
-typedef uint64_t *counter_u64_t;
-
-#ifdef _KERNEL
-#include <machine/counter.h>
-
-counter_u64_t	counter_u64_alloc(int);
-void		counter_u64_free(counter_u64_t);
-
-void		counter_u64_zero(counter_u64_t);
-uint64_t	counter_u64_fetch(counter_u64_t);
-
-#define	COUNTER_ARRAY_ALLOC(a, n, wait)	do {			\
-	for (int i = 0; i < (n); i++)				\
-		(a)[i] = counter_u64_alloc(wait);		\
-} while (0)
-
-#define	COUNTER_ARRAY_FREE(a, n)	do {			\
-	for (int i = 0; i < (n); i++)				\
-		counter_u64_free((a)[i]);			\
-} while (0)
-
-#define	COUNTER_ARRAY_COPY(a, dstp, n)	do {			\
-	for (int i = 0; i < (n); i++)				\
-		((uint64_t *)(dstp))[i] = counter_u64_fetch((a)[i]);\
-} while (0)
-
-#define	COUNTER_ARRAY_ZERO(a, n)	do {			\
-	for (int i = 0; i < (n); i++)				\
-		counter_u64_zero((a)[i]);			\
-} while (0)
-
-/*
- * counter(9) based rate checking.
- */
-struct counter_rate {
-	counter_u64_t	cr_rate;	/* Events since last second */
-	volatile int	cr_lock;	/* Lock to clean the struct */
-	int		cr_ticks;	/* Ticks on last clean */
-	int		cr_over;	/* Over limit since cr_ticks? */
-};
-
-int64_t	counter_ratecheck(struct counter_rate *, int64_t);
-
-#endif	/* _KERNEL */
-#endif	/* ! __SYS_COUNTER_H__ */
+#define	READ4(_sc, _reg)	\
+	bus_space_read_4(_sc->bst, _sc->bsh, _reg)
+#define	WRITE4(_sc, _reg, _val)	\
+	bus_space_write_4(_sc->bst, _sc->bsh, _reg, _val)
