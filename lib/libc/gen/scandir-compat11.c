@@ -51,16 +51,32 @@ __FBSDID("$FreeBSD$");
 
 #include "gen-compat.h"
 
+#ifdef	I_AM_SCANDIR_B
+#include "block_abi.h"
+#define	SELECT(x)	CALL_BLOCK(select, x)
+#ifndef __BLOCKS__
+void
+qsort_b(void *, size_t, size_t, void*);
+#endif
+#else
 #define	SELECT(x)	select(x)
+#endif
 
 static int freebsd11_alphasort_thunk(void *thunk, const void *p1,
     const void *p2);
 
 int
+#ifdef I_AM_SCANDIR_B
+freebsd11_scandir_b(const char *dirname, struct freebsd11_dirent ***namelist,
+    DECLARE_BLOCK(int, select, const struct freebsd11_dirent *),
+    DECLARE_BLOCK(int, dcomp, const struct freebsd11_dirent **,
+    const struct freebsd11_dirent **))
+#else
 freebsd11_scandir(const char *dirname, struct freebsd11_dirent ***namelist,
     int (*select)(const struct freebsd11_dirent *),
     int (*dcomp)(const struct freebsd11_dirent **,
 	const struct freebsd11_dirent **))
+#endif
 {
 	struct freebsd11_dirent *d, *p, **names = NULL;
 	size_t nitems = 0;
@@ -111,8 +127,13 @@ freebsd11_scandir(const char *dirname, struct freebsd11_dirent ***namelist,
 	}
 	closedir(dirp);
 	if (nitems && dcomp != NULL)
+#ifdef I_AM_SCANDIR_B
+		qsort_b(names, nitems, sizeof(struct freebsd11_dirent *),
+		    (void*)dcomp);
+#else
 		qsort_r(names, nitems, sizeof(struct freebsd11_dirent *),
 		    &dcomp, freebsd11_alphasort_thunk);
+#endif
 	*namelist = names;
 	return (nitems);
 
@@ -150,3 +171,4 @@ freebsd11_alphasort_thunk(void *thunk, const void *p1, const void *p2)
 
 __sym_compat(alphasort, freebsd11_alphasort, FBSD_1.0);
 __sym_compat(scandir, freebsd11_scandir, FBSD_1.0);
+__sym_compat(scandir_b, freebsd11_scandir_b, FBSD_1.4);
