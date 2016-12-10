@@ -139,7 +139,8 @@ freebsd11_alphasort(const struct freebsd11_dirent **d1,
 static int
 freebsd11_alphasort_thunk(void *thunk, const void *p1, const void *p2)
 {
-	int (*dc)(const struct freebsd11_dirent **, const struct freebsd11_dirent **);
+	int (*dc)(const struct freebsd11_dirent **, const struct
+	    freebsd11_dirent **);
 
 	dc = *(int (**)(const struct freebsd11_dirent **,
 	    const struct freebsd11_dirent **))thunk;
