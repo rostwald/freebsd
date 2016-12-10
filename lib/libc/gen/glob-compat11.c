@@ -43,47 +43,13 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
 #include <sys/cdefs.h>
 __FBSDID("$FreeBSD$");
 
-/*
- * glob(3) -- a superset of the one defined in POSIX 1003.2.
- *
- * The [!...] convention to negate a range is supported (SysV, Posix, ksh).
- *
- * Optional extra services, controlled by flags not defined by POSIX:
- *
- * GLOB_QUOTE:
- *	Escaping convention: \ inhibits any special meaning the following
- *	character might have (except \ at end of string is retained).
- * GLOB_MAGCHAR:
- *	Set in gl_flags if pattern contained a globbing character.
- * GLOB_NOMAGIC:
- *	Same as GLOB_NOCHECK, but it will only append pattern if it did
- *	not contain any magic characters.  [Used in csh style globbing]
- * GLOB_ALTDIRFUNC:
- *	Use alternately specified directory access functions.
- * GLOB_TILDE:
- *	expand ~user/foo to the /home/dir/of/user/foo
- * GLOB_BRACE:
- *	expand {1,2}{a,b} to 1a 1b 2a 2b
- * gl_matchc:
- *	Number of matches in the current invocation of glob.
- */
-
-/*
- * Some notes on multibyte character support:
- * 1. Patterns with illegal byte sequences match nothing - even if
- *    GLOB_NOCHECK is specified.
- * 2. Illegal byte sequences in filenames are handled by treating them as
- *    single-byte characters with a values of such bytes of the sequence
- *    cast to wchar_t.
- * 3. State-dependent encodings are not currently supported.
- */
-
 #include <sys/param.h>
 #include <sys/stat.h>
 
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
+#include <glob.h>
 #include <limits.h>
 #include <pwd.h>
 #include <stdint.h>
@@ -154,41 +120,41 @@ typedef uint_fast64_t Char;
 
 static int	 compare(const void *, const void *);
 static int	 g_Ctoc(const Char *, char *, size_t);
-static int	 g_lstat(Char *, struct freebsd11_stat *, glob_t *);
-static DIR	*g_opendir(Char *, glob_t *);
+static int	 g_lstat(Char *, struct freebsd11_stat *, glob11_t *);
+static DIR	*g_opendir(Char *, glob11_t *);
 static const Char *g_strchr(const Char *, wchar_t);
 #ifdef notdef
 static Char	*g_strcat(Char *, const Char *);
 #endif
-static int	 g_stat(Char *, struct freebsd11_stat *, glob_t *);
-static int	 glob0(const Char *, glob_t *, struct glob_limit *,
+static int	 g_stat(Char *, struct freebsd11_stat *, glob11_t *);
+static int	 glob0(const Char *, glob11_t *, struct glob_limit *,
     const char *);
-static int	 glob1(Char *, glob_t *, struct glob_limit *);
-static int	 glob2(Char *, Char *, Char *, Char *, glob_t *,
+static int	 glob1(Char *, glob11_t *, struct glob_limit *);
+static int	 glob2(Char *, Char *, Char *, Char *, glob11_t *,
     struct glob_limit *);
-static int	 glob3(Char *, Char *, Char *, Char *, Char *, glob_t *,
+static int	 glob3(Char *, Char *, Char *, Char *, Char *, glob11_t *,
     struct glob_limit *);
-static int	 globextend(const Char *, glob_t *, struct glob_limit *,
+static int	 globextend(const Char *, glob11_t *, struct glob_limit *,
     const char *);
 static const Char *
-		 globtilde(const Char *, Char *, size_t, glob_t *);
-static int	 globexp0(const Char *, glob_t *, struct glob_limit *,
+		 globtilde(const Char *, Char *, size_t, glob11_t *);
+static int	 globexp0(const Char *, glob11_t *, struct glob_limit *,
     const char *);
-static int	 globexp1(const Char *, glob_t *, struct glob_limit *);
-static int	 globexp2(const Char *, const Char *, glob_t *,
+static int	 globexp1(const Char *, glob11_t *, struct glob_limit *);
+static int	 globexp2(const Char *, const Char *, glob11_t *,
     struct glob_limit *);
-static int	 globfinal(glob_t *, struct glob_limit *, size_t,
+static int	 globfinal(glob11_t *, struct glob_limit *, size_t,
     const char *);
 static int	 match(Char *, Char *, Char *);
-static int	 err_nomatch(glob_t *, struct glob_limit *, const char *);
-static int	 err_aborted(glob_t *, int, char *);
+static int	 err_nomatch(glob11_t *, struct glob_limit *, const char *);
+static int	 err_aborted(glob11_t *, int, char *);
 #ifdef DEBUG
 static void	 qprintf(const char *, Char *);
 #endif
 
 int
 freebsd11_glob(const char * __restrict pattern, int flags,
-	 int (*errfunc)(const char *, int), glob_t * __restrict pglob)
+	 int (*errfunc)(const char *, int), glob11_t * __restrict pglob)
 {
 	struct glob_limit limit = { 0, 0, 0, 0, 0 };
 	const char *patnext;
@@ -264,7 +230,7 @@ freebsd11_glob(const char * __restrict pattern, int flags,
 }
 
 static int
-globexp0(const Char *pattern, glob_t *pglob, struct glob_limit *limit,
+globexp0(const Char *pattern, glob11_t *pglob, struct glob_limit *limit,
     const char *origpat) {
 	int rv;
 	size_t oldpathc;
@@ -293,7 +259,7 @@ globexp0(const Char *pattern, glob_t *pglob, struct glob_limit *limit,
  * characters
  */
 static int
-globexp1(const Char *pattern, glob_t *pglob, struct glob_limit *limit)
+globexp1(const Char *pattern, glob11_t *pglob, struct glob_limit *limit)
 {
 	const Char* ptr;
 
@@ -316,7 +282,7 @@ globexp1(const Char *pattern, glob_t *pglob, struct glob_limit *limit)
  * If it fails then it tries to glob the rest of the pattern and returns.
  */
 static int
-globexp2(const Char *ptr, const Char *pattern, glob_t *pglob,
+globexp2(const Char *ptr, const Char *pattern, glob11_t *pglob,
     struct glob_limit *limit)
 {
 	int     i, rv;
@@ -420,7 +386,7 @@ globexp2(const Char *ptr, const Char *pattern, glob_t *pglob,
  * expand tilde from the passwd file.
  */
 static const Char *
-globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
+globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob11_t *pglob)
 {
 	struct passwd *pwd;
 	char *h, *sc;
@@ -433,7 +399,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 	mbstate_t mbs;
 	int too_long;
 
-	if (*pattern != TILDE || !(pglob->gl_flags & GLOB_TILDE))
+	if (*pattern != TILDE || !(pglob->gl_flags & GLOB11_TILDE))
 		return (pattern);
 
 	/* 
@@ -532,7 +498,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
  * if things went well, nonzero if errors occurred.
  */
 static int
-glob0(const Char *pattern, glob_t *pglob, struct glob_limit *limit,
+glob0(const Char *pattern, glob11_t *pglob, struct glob_limit *limit,
     const char *origpat) {
 	const Char *qpatnext;
 	int err;
@@ -609,7 +575,7 @@ glob0(const Char *pattern, glob_t *pglob, struct glob_limit *limit,
 }
 
 static int
-globfinal(glob_t *pglob, struct glob_limit *limit, size_t oldpathc,
+globfinal(glob11_t *pglob, struct glob_limit *limit, size_t oldpathc,
     const char *origpat) {
 	if (pglob->gl_pathc == oldpathc)
 		return (err_nomatch(pglob, limit, origpat));
@@ -628,7 +594,7 @@ compare(const void *p, const void *q)
 }
 
 static int
-glob1(Char *pattern, glob_t *pglob, struct glob_limit *limit)
+glob1(Char *pattern, glob11_t *pglob, struct glob_limit *limit)
 {
 	Char pathbuf[MAXPATHLEN];
 
@@ -646,7 +612,7 @@ glob1(Char *pattern, glob_t *pglob, struct glob_limit *limit)
  */
 static int
 glob2(Char *pathbuf, Char *pathend, Char *pathend_last, Char *pattern,
-      glob_t *pglob, struct glob_limit *limit)
+      glob11_t *pglob, struct glob_limit *limit)
 {
 	struct freebsd11_stat sb;
 	Char *p, *q;
@@ -717,7 +683,7 @@ glob2(Char *pathbuf, Char *pathend, Char *pathend_last, Char *pattern,
 static int
 glob3(Char *pathbuf, Char *pathend, Char *pathend_last,
       Char *pattern, Char *restpattern,
-      glob_t *pglob, struct glob_limit *limit)
+      glob11_t *pglob, struct glob_limit *limit)
 {
 	struct freebsd11_dirent *dp;
 	DIR *dirp;
@@ -836,7 +802,7 @@ glob3(Char *pathbuf, Char *pathend, Char *pathend_last,
 
 
 /*
- * Extend the gl_pathv member of a glob_t structure to accommodate a new item,
+ * Extend the gl_pathv member of a glob11_t structure to accommodate a new item,
  * add the new item, and update gl_pathc.
  *
  * This assumes the BSD realloc, which only copies the block when its size
@@ -845,12 +811,12 @@ glob3(Char *pathbuf, Char *pathend, Char *pathend_last,
  *
  * Return 0 if new item added, error code if memory couldn't be allocated.
  *
- * Invariant of the glob_t structure:
+ * Invariant of the glob11_t structure:
  *	Either gl_pathc is zero and gl_pathv is NULL; or gl_pathc > 0 and
  *	gl_pathv points to (gl_offs + gl_pathc + 1) items.
  */
 static int
-globextend(const Char *path, glob_t *pglob, struct glob_limit *limit,
+globextend(const Char *path, glob11_t *pglob, struct glob_limit *limit,
     const char *origpat)
 {
 	char **pathv;
@@ -964,9 +930,9 @@ match(Char *name, Char *pat, Char *patend)
 	return (*name == EOS);
 }
 
-/* Free allocated data belonging to a glob_t structure. */
+/* Free allocated data belonging to a glob11_t structure. */
 void
-freebsd11_globfree(glob_t *pglob)
+freebsd11_globfree(glob11_t *pglob)
 {
 	size_t i;
 	char **pp;
@@ -982,7 +948,7 @@ freebsd11_globfree(glob_t *pglob)
 }
 
 static DIR *
-g_opendir(Char *str, glob_t *pglob)
+g_opendir(Char *str, glob11_t *pglob)
 {
 	char buf[MAXPATHLEN + MB_LEN_MAX - 1];
 
@@ -1002,7 +968,7 @@ g_opendir(Char *str, glob_t *pglob)
 }
 
 static int
-g_lstat(Char *fn, struct freebsd11_stat *sb, glob_t *pglob)
+g_lstat(Char *fn, struct freebsd11_stat *sb, glob11_t *pglob)
 {
 	char buf[MAXPATHLEN + MB_LEN_MAX - 1];
 
@@ -1016,7 +982,7 @@ g_lstat(Char *fn, struct freebsd11_stat *sb, glob_t *pglob)
 }
 
 static int
-g_stat(Char *fn, struct freebsd11_stat *sb, glob_t *pglob)
+g_stat(Char *fn, struct freebsd11_stat *sb, glob11_t *pglob)
 {
 	char buf[MAXPATHLEN + MB_LEN_MAX - 1];
 
@@ -1065,7 +1031,7 @@ g_Ctoc(const Char *str, char *buf, size_t len)
 }
 
 static int
-err_nomatch(glob_t *pglob, struct glob_limit *limit, const char *origpat) {
+err_nomatch(glob11_t *pglob, struct glob_limit *limit, const char *origpat) {
 	/*
 	 * If there was no match we are going to append the origpat
 	 * if GLOB_NOCHECK was specified or if GLOB_NOMAGIC was specified
@@ -1080,7 +1046,7 @@ err_nomatch(glob_t *pglob, struct glob_limit *limit, const char *origpat) {
 }
 
 static int
-err_aborted(glob_t *pglob, int err, char *buf) {
+err_aborted(glob11_t *pglob, int err, char *buf) {
 	if ((pglob->gl_errfunc != NULL && pglob->gl_errfunc(buf, err)) ||
 	    (pglob->gl_flags & GLOB_ERR))
 		return (GLOB_ABORTED);

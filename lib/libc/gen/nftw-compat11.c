@@ -27,6 +27,7 @@ __FBSDID("$FreeBSD$");
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <fts.h>
 #include <ftw.h>
 
 #include "fts-compat11.h"
@@ -38,8 +39,8 @@ freebsd11_nftw(const char *path,
 {
 	char * const paths[2] = { (char *)path, NULL };
 	struct FTW ftw;
-	FTSENT *cur;
-	FTS *ftsp;
+	FTSENT11 *cur;
+	FTS11 *ftsp;
 	int error = 0, ftsflags, fnflag, postorder, sverrno;
 
 	/* XXX - nfds is currently unused */

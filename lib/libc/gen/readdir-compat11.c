@@ -55,6 +55,7 @@ __FBSDID("$FreeBSD$");
 static int
 freebsd11_cvtdirent(struct freebsd11_dirent *dstdp, struct dirent *srcdp)
 {
+
 	if (srcdp->d_namlen > sizeof(dstdp->d_name) - 1)
 		return (ENAMETOOLONG);
 	dstdp->d_type = srcdp->d_type;

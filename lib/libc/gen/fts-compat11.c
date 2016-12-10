@@ -48,6 +48,7 @@ __FBSDID("$FreeBSD$");
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <fts.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -57,17 +58,17 @@ __FBSDID("$FreeBSD$");
 
 #include "gen-private.h"
 
-static FTSENT	*fts_alloc(FTS *, char *, size_t);
-static FTSENT	*fts_build(FTS *, int);
-static void	 fts_lfree(FTSENT *);
-static void	 fts_load(FTS *, FTSENT *);
+static FTSENT11	*fts_alloc(FTS11 *, char *, size_t);
+static FTSENT11	*fts_build(FTS11 *, int);
+static void	 fts_lfree(FTSENT11 *);
+static void	 fts_load(FTS11 *, FTSENT11 *);
 static size_t	 fts_maxarglen(char * const *);
-static void	 fts_padjust(FTS *, FTSENT *);
-static int	 fts_palloc(FTS *, size_t);
-static FTSENT	*fts_sort(FTS *, FTSENT *, size_t);
-static int	 fts_stat(FTS *, FTSENT *, int, int);
-static int	 fts_safe_changedir(FTS *, FTSENT *, int, char *);
-static int	 fts_ufslinks(FTS *, const FTSENT *);
+static void	 fts_padjust(FTS11 *, FTSENT11 *);
+static int	 fts_palloc(FTS11 *, size_t);
+static FTSENT11	*fts_sort(FTS11 *, FTSENT11 *, size_t);
+static int	 fts_stat(FTS11 *, FTSENT11 *, int, int);
+static int	 fts_safe_changedir(FTS11 *, FTSENT11 *, int, char *);
+static int	 fts_ufslinks(FTS11 *, const FTSENT11 *);
 
 #define	ISDOT(a)	(a[0] == '.' && (!a[1] || (a[1] == '.' && !a[2])))
 
@@ -87,8 +88,8 @@ static int	 fts_ufslinks(FTS *, const FTSENT *);
  * details.  The FTS returned from fts_open points to this structure's
  * ftsp_fts member (and can be cast to an _fts_private as required)
  */
-struct _fts_private {
-	FTS		ftsp_fts;
+struct _fts_private11 {
+	FTS11		ftsp_fts;
 	struct freebsd11_statfs	ftsp_statfs;
 	uint32_t	ftsp_dev;
 	int		ftsp_linksreliable;
@@ -111,14 +112,14 @@ static const char *ufslike_filesystems[] = {
 	0
 };
 
-FTS *
+FTS11 *
 freebsd11_fts_open(char * const *argv, int options,
-    int (*compar)(const FTSENT * const *, const FTSENT * const *))
+    int (*compar)(const FTSENT11 * const *, const FTSENT11 * const *))
 {
-	struct _fts_private *priv;
-	FTS *sp;
-	FTSENT *p, *root;
-	FTSENT *parent, *tmp;
+	struct _fts_private11 *priv;
+	FTS11 *sp;
+	FTSENT11 *p, *root;
+	FTSENT11 *parent, *tmp;
 	size_t len, nitems;
 
 	/* Options check. */
@@ -224,7 +225,7 @@ mem1:	free(sp);
 }
 
 static void
-fts_load(FTS *sp, FTSENT *p)
+fts_load(FTS11 *sp, FTSENT11 *p)
 {
 	size_t len;
 	char *cp;
@@ -248,9 +249,9 @@ fts_load(FTS *sp, FTSENT *p)
 }
 
 int
-freebsd11_fts_close(FTS *sp)
+freebsd11_fts_close(FTS11 *sp)
 {
-	FTSENT *freep, *p;
+	FTSENT11 *freep, *p;
 	int saved_errno;
 
 	/*
@@ -301,10 +302,10 @@ freebsd11_fts_close(FTS *sp)
 	(p->fts_path[p->fts_pathlen - 1] == '/'				\
 	    ? p->fts_pathlen - 1 : p->fts_pathlen)
 
-FTSENT *
-freebsd11_fts_read(FTS *sp)
+FTSENT11 *
+freebsd11_fts_read(FTS11 *sp)
 {
-	FTSENT *p, *tmp;
+	FTSENT11 *p, *tmp;
 	int instr;
 	char *t;
 	int saved_errno;
@@ -500,7 +501,7 @@ name:		t = sp->fts_path + NAPPEND(p->fts_parent);
  */
 /* ARGSUSED */
 int
-freebsd11_fts_set(FTS *sp, FTSENT *p, int instr)
+freebsd11_fts_set(FTS11 *sp, FTSENT11 *p, int instr)
 {
 	if (instr != 0 && instr != FTS_AGAIN && instr != FTS_FOLLOW &&
 	    instr != FTS_NOINSTR && instr != FTS_SKIP) {
@@ -511,10 +512,10 @@ freebsd11_fts_set(FTS *sp, FTSENT *p, int instr)
 	return (0);
 }
 
-FTSENT *
-freebsd11_fts_children(FTS *sp, int instr)
+FTSENT11 *
+freebsd11_fts_children(FTS11 *sp, int instr)
 {
-	FTSENT *p;
+	FTSENT11 *p;
 	int fd, rc, serrno;
 
 	if (instr != 0 && instr != FTS_NAMEONLY) {
@@ -587,7 +588,7 @@ freebsd11_fts_children(FTS *sp, int instr)
 #endif
 
 void *
-(freebsd11_fts_get_clientptr)(FTS *sp)
+(freebsd11_fts_get_clientptr)(FTS11 *sp)
 {
 
 	return (freebsd11_fts_get_clientptr(sp));
@@ -597,14 +598,14 @@ void *
 #error "freebsd11_fts_get_stream not defined"
 #endif
 
-FTS *
-(freebsd11_fts_get_stream)(FTSENT *p)
+FTS11 *
+(freebsd11_fts_get_stream)(FTSENT11 *p)
 {
 	return (freebsd11_fts_get_stream(p));
 }
 
 void
-freebsd11_fts_set_clientptr(FTS *sp, void *clientptr)
+freebsd11_fts_set_clientptr(FTS11 *sp, void *clientptr)
 {
 
 	sp->fts_clientptr = clientptr;
@@ -624,12 +625,12 @@ freebsd11_fts_set_clientptr(FTS *sp, void *clientptr)
  * directories and for any files after the subdirectories in the directory have
  * been found, cutting the stat calls by about 2/3.
  */
-static FTSENT *
-fts_build(FTS *sp, int type)
+static FTSENT11 *
+fts_build(FTS11 *sp, int type)
 {
 	struct freebsd11_dirent *dp;
-	FTSENT *p, *head;
-	FTSENT *cur, *tail;
+	FTSENT11 *p, *head;
+	FTSENT11 *cur, *tail;
 	DIR *dirp;
 	void *oldaddr;
 	char *cp;
@@ -873,9 +874,9 @@ mem1:				saved_errno = errno;
 }
 
 static int
-fts_stat(FTS *sp, FTSENT *p, int follow, int dfd)
+fts_stat(FTS11 *sp, FTSENT11 *p, int follow, int dfd)
 {
-	FTSENT *t;
+	FTSENT11 *t;
 	uint32_t dev;
 	uint32_t ino;
 	struct freebsd11_stat *sbp, sb;
@@ -969,16 +970,16 @@ err:		memset(sbp, 0, sizeof(struct stat));
 static int
 fts_compar(const void *a, const void *b)
 {
-	FTS *parent;
+	FTS11 *parent;
 
-	parent = (*(const FTSENT * const *)a)->fts_fts;
+	parent = (*(const FTSENT11 * const *)a)->fts_fts;
 	return (*parent->fts_compar)(a, b);
 }
 
-static FTSENT *
-fts_sort(FTS *sp, FTSENT *head, size_t nitems)
+static FTSENT11 *
+fts_sort(FTS11 *sp, FTSENT11 *head, size_t nitems)
 {
-	FTSENT **ap, *p;
+	FTSENT11 **ap, *p;
 
 	/*
 	 * Construct an array of pointers to the structures and call qsort(3).
@@ -1004,14 +1005,14 @@ fts_sort(FTS *sp, FTSENT *head, size_t nitems)
 	return (head);
 }
 
-static FTSENT *
-fts_alloc(FTS *sp, char *name, size_t namelen)
+static FTSENT11 *
+fts_alloc(FTS11 *sp, char *name, size_t namelen)
 {
-	FTSENT *p;
+	FTSENT11 *p;
 	size_t len;
 
-	struct ftsent_withstat {
-		FTSENT	ent;
+	struct ftsent11_withstat {
+		FTSENT11	ent;
 		struct	freebsd11_stat statbuf;
 	};
 
@@ -1022,9 +1023,9 @@ fts_alloc(FTS *sp, char *name, size_t namelen)
 	 * be careful that the stat structure is reasonably aligned.
 	 */
 	if (ISSET(FTS_NOSTAT))
-		len = sizeof(FTSENT) + namelen + 1;
+		len = sizeof(FTSENT11) + namelen + 1;
 	else
-		len = sizeof(struct ftsent_withstat) + namelen + 1;
+		len = sizeof(struct ftsent11_withstat) + namelen + 1;
 
 	if ((p = malloc(len)) == NULL)
 		return (NULL);
@@ -1033,8 +1034,8 @@ fts_alloc(FTS *sp, char *name, size_t namelen)
 		p->fts_name = (char *)(p + 1);
 		p->fts_statp = NULL;
 	} else {
-		p->fts_name = (char *)((struct ftsent_withstat *)p + 1);
-		p->fts_statp = &((struct ftsent_withstat *)p)->statbuf;
+		p->fts_name = (char *)((struct ftsent11_withstat *)p + 1);
+		p->fts_statp = &((struct ftsent11_withstat *)p)->statbuf;
 	}
 
 	/* Copy the name and guarantee NUL termination. */
@@ -1052,9 +1053,9 @@ fts_alloc(FTS *sp, char *name, size_t namelen)
 }
 
 static void
-fts_lfree(FTSENT *head)
+fts_lfree(FTSENT11 *head)
 {
-	FTSENT *p;
+	FTSENT11 *p;
 
 	/* Free a linked list of structures. */
 	while ((p = head)) {
@@ -1070,7 +1071,7 @@ fts_lfree(FTSENT *head)
  * plus 256 bytes so don't realloc the path 2 bytes at a time.
  */
 static int
-fts_palloc(FTS *sp, size_t more)
+fts_palloc(FTS11 *sp, size_t more)
 {
 
 	sp->fts_pathlen += more + 256;
@@ -1083,9 +1084,9 @@ fts_palloc(FTS *sp, size_t more)
  * already returned.
  */
 static void
-fts_padjust(FTS *sp, FTSENT *head)
+fts_padjust(FTS11 *sp, FTSENT11 *head)
 {
-	FTSENT *p;
+	FTSENT11 *p;
 	char *addr = sp->fts_path;
 
 #define	ADJUST(p) do {							\
@@ -1123,7 +1124,7 @@ fts_maxarglen(char * const *argv)
  * Assumes p->fts_dev and p->fts_ino are filled in.
  */
 static int
-fts_safe_changedir(FTS *sp, FTSENT *p, int fd, char *path)
+fts_safe_changedir(FTS11 *sp, FTSENT11 *p, int fd, char *path)
 {
 	int ret, oerrno, newfd;
 	struct freebsd11_stat sb;
@@ -1156,7 +1157,7 @@ bail:
  * Check if the filesystem for "ent" has UFS-style links.
  */
 static int
-fts_ufslinks(FTS *sp, const FTSENT *ent)
+fts_ufslinks(FTS11 *sp, const FTSENT11 *ent)
 {
 	struct _fts_private *priv;
 	const char **cpp;
