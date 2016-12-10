@@ -1159,10 +1159,10 @@ bail:
 static int
 fts_ufslinks(FTS11 *sp, const FTSENT11 *ent)
 {
-	struct _fts_private *priv;
+	struct _fts_private11 *priv;
 	const char **cpp;
 
-	priv = (struct _fts_private *)sp;
+	priv = (struct _fts_private11 *)sp;
 	/*
 	 * If this node's device is different from the previous, grab
 	 * the filesystem information, and decide on the reliability

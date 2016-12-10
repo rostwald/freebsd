@@ -399,7 +399,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob11_t *pglob)
 	mbstate_t mbs;
 	int too_long;
 
-	if (*pattern != TILDE || !(pglob->gl_flags & GLOB11_TILDE))
+	if (*pattern != TILDE || !(pglob->gl_flags & GLOB_TILDE))
 		return (pattern);
 
 	/* 

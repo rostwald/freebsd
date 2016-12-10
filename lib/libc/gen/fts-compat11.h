@@ -84,13 +84,13 @@ FTSENT11	*freebsd11_fts_children(FTS11 *, int);
 int		 freebsd11_fts_close(FTS11 *);
 void		*freebsd11_fts_get_clientptr(FTS11 *);
 #define	freebsd11_fts_get_clientptr(fts)	((fts)->fts_clientptr)
-FTS11		*freebsd11_fts_get_stream(FTSENT *);
+FTS11		*freebsd11_fts_get_stream(FTSENT11 *);
 #define	freebsd11_fts_get_stream(ftsent)	((ftsent)->fts_fts)
 FTS11		*freebsd11_fts_open(char * const *, int,
 		    int (*)(const FTSENT11 * const *,
 		    const FTSENT11 * const *));
 FTSENT11	*freebsd11_fts_read(FTS11 *);
-int		 freebsd11_fts_set(FTS *, FTSENT11 *, int);
+int		 freebsd11_fts_set(FTS11 *, FTSENT11 *, int);
 void		 freebsd11_fts_set_clientptr(FTS11 *, void *);
 
 #endif /* !_FTS_COMPAT11_H_ */
