@@ -92,7 +92,7 @@ struct statfs {
 	char	  f_mntonname[MNAMELEN];    /* directory on which mounted */
 };
 
-#ifdef _WANT_FREEBSD11_STATFS
+#if defined(_WANT_FREEBSD11_STATFS) || defined(_KERNEL)
 #define	FREEBSD11_STATFS_VERSION	0x20030518 /* current version number */
 struct freebsd11_statfs {
 	uint32_t f_version;		/* structure version number */
@@ -118,7 +118,7 @@ struct freebsd11_statfs {
 	char	  f_mntfromname[88];	/* mounted filesystem */
 	char	  f_mntonname[88];	/* directory on which mounted */
 };
-#endif /* _WANT_FREEBSD11_STATFS */
+#endif /* _WANT_FREEBSD11_STATFS || _KERNEL */
 
 #ifdef _KERNEL
 #define	OMFSNAMELEN	16	/* length of fs type name, including null */

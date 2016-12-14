@@ -119,7 +119,7 @@ struct ostat {
 };
 #endif
 
-#ifdef _WANT_FREEBSD11_STAT
+#if defined(_WANT_FREEBSD11_STAT) || defined(_KERNEL)
 struct freebsd11_stat {
 	__uint32_t st_dev;		/* inode's device */
 	__uint32_t st_ino;		/* inode's number */
@@ -149,7 +149,7 @@ struct freebsd11_stat {
 	unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
 	unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
 };
-#endif /* _WANT_FREEBSD11_STAT */
+#endif /* _WANT_FREEBSD11_STAT || _KERNEL */
 
 struct stat {
 	dev_t     st_dev;		/* inode's device */
