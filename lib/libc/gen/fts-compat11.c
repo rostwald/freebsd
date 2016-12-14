@@ -45,6 +45,7 @@ __FBSDID("$FreeBSD$");
 #include <sys/mount.h>
 #include <sys/stat.h>
 
+#define	_WANT_FREEBSD11_DIRENT
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

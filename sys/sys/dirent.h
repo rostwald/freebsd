@@ -71,7 +71,7 @@ struct dirent {
 #endif
 };
 
-#if __BSD_VISIBLE
+#ifdef _WANT_FREEBSD11_DIRENT
 struct freebsd11_dirent {
 	__uint32_t d_fileno;		/* file number of entry */
 	__uint16_t d_reclen;		/* length of this record */
@@ -79,6 +79,9 @@ struct freebsd11_dirent {
 	__uint8_t  d_namlen;		/* length of string in d_name */
 	char	d_name[255 + 1];	/* name must be no longer than this */
 };
+#endif
+
+#if __BSD_VISIBLE
 
 /*
  * File types

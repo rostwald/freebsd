@@ -44,6 +44,7 @@ __FBSDID("$FreeBSD$");
  */
 
 #include "namespace.h"
+#define	_WANT_FREEBSD11_DIRENT
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
