@@ -191,7 +191,8 @@ struct nstat {
 	__uint32_t st_gen;		/* file generation number */
 	struct timespec st_birthtim;	/* time of file creation */
 	/*
-	 * See above about the following padding.
+	 * See comment in the definition of struct freebsd11_stat
+	 * above about the following padding.
 	 */
 	unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
 	unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
