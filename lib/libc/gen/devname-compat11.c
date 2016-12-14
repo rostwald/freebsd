@@ -30,9 +30,7 @@ __FBSDID("$FreeBSD$");
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdlib.h>
-
-char *freebsd11_devname(uint32_t dev, mode_t type);
-char *freebsd11_devname_r(uint32_t dev, mode_t type, char *buf, int len);
+#include "gen-compat.h"
 
 char *
 freebsd11_devname(uint32_t dev, mode_t type)

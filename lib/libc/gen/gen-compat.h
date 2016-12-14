@@ -51,4 +51,7 @@ int	freebsd11_statfs(const char *, struct freebsd11_statfs *);
 int	freebsd11_getfsstat(struct freebsd11_statfs *, long, int);
 int	freebsd11_getmntinfo(struct freebsd11_statfs **, int);
 
+char	*freebsd11_devname(uint32_t dev, mode_t type);
+char	*freebsd11_devname_r(uint32_t dev, mode_t type, char *buf, int len);
+
 #endif /* _GEN_COMPAT_H_ */
