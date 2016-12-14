@@ -40,9 +40,12 @@ __FBSDID("$FreeBSD$");
 
 #include "namespace.h"
 #include <sys/param.h>
+#define	_WANT_FREEBSD11_STATFS
 #include <sys/mount.h>
+#define	_WANT_FREEBSD11_STAT
 #include <sys/stat.h>
 
+#define	_WANT_FREEBSD11_DIRENT
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

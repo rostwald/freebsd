@@ -44,9 +44,11 @@ static char sccsid[] = "@(#)glob.c	8.3 (Berkeley) 10/13/93";
 __FBSDID("$FreeBSD$");
 
 #include <sys/param.h>
+#define	_WANT_FREEBSD11_STAT
 #include <sys/stat.h>
 
 #include <ctype.h>
+#define	_WANT_FREEBSD11_DIRENT
 #include <dirent.h>
 #include <errno.h>
 #include <glob.h>
