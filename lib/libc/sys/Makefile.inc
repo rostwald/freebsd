@@ -31,10 +31,11 @@ NOASM+=  clock_gettime.o gettimeofday.o
 PSEUDO+= _clock_gettime.o _gettimeofday.o
 
 # Sources common to both syscall interfaces:
-SRCS+=	getdents.c lstat.c mknod.c stat.c
 SRCS+=	\
 	__error.c \
 	interposing_table.c
+
+SRCS+= getdents.c lstat.c mknod.c stat.c
 
 SRCS+= futimens.c utimensat.c
 NOASM+= futimens.o utimensat.o
