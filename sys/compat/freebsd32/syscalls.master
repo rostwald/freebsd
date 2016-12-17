@@ -1088,29 +1088,23 @@
 				    id_t id, \
 				    const struct vm_domain_policy *policy); }
 550	AUE_FSYNC	NOPROTO	{ int fdatasync(int fd); }
-551	AUE_STAT	STD	{ int freebsd32_stat(char *path, \
-				    struct freebsd11_stat32 *ub); }
-552	AUE_LSTAT	STD	{ int freebsd32_lstat(char *path, \
-				    struct freebsd11_stat32 *ub); }
-553	AUE_FSTAT	STD	{ int freebsd32_fstat(int fd, \
-				    struct freebsd11_stat32 *ub); }
-554	AUE_FSTATAT	STD	{ int freebsd32_fstatat(int fd, \
-				    char *path, struct freebsd11_stat32 *buf, \
+551	AUE_FSTAT	STD	{ int freebsd32_fstat(int fd, \
+				    struct stat32 *ub); }
+552	AUE_FSTATAT	STD	{ int freebsd32_fstatat(int fd, \
+				    char *path, struct stat32 *buf, \
 				    int flag); }
-555	AUE_FHSTAT	STD	{ int freebsd32_fhstat( \
+553	AUE_FHSTAT	STD	{ int freebsd32_fhstat( \
 				    const struct fhandle *u_fhp, \
-				    struct stat *sb); }
-556	AUE_GETDIRENTRIES STD	{ ssize_t freebsd32_getdirentries( \
+				    struct stat32 *sb); }
+554	AUE_GETDIRENTRIES STD	{ ssize_t freebsd32_getdirentries( \
 				    int fd, char *buf, size_t count, \
-				    off_t *basep); }
-557	AUE_O_GETDENTS	STD	{ int freebsd32_getdents(int fd, \
-				    char *buf, size_t count); }
-558	AUE_STATFS	NOPROTO	{ int statfs(char *path, struct statfs *buf); }
-559	AUE_FSTATFS	NOPROTO	{ int fstatfs(int fd, struct statfs *buf); }
-560	AUE_GETFSSTAT	NOPROTO	{ int getfsstat(struct statfs *buf, \
+				    int32_t *basep); }
+555	AUE_STATFS	NOPROTO	{ int statfs(char *path, \
+				    struct statfs32 *buf); }
+556	AUE_FSTATFS	NOPROTO	{ int fstatfs(int fd, struct statfs32 *buf); }
+557	AUE_GETFSSTAT	NOPROTO	{ int getfsstat(struct statfs32 *buf, \
 				    long bufsize, int flags); }
-561	AUE_FHSTATFS	NOPROTO	{ int fhstatfs(const struct fhandle *u_fhp, \
-				    struct statfs *buf); }
-562	AUE_MKNOD	NOPROTO	{ int mknod(char *path, int mode, int dev); }
-563	AUE_MKNODAT	NOPROTO	{ int mknodat(int fd, char *path, mode_t mode, \
+558	AUE_FHSTATFS	NOPROTO	{ int fhstatfs(const struct fhandle *u_fhp, \
+				    struct statfs32 *buf); }
+559	AUE_MKNODAT	NOPROTO	{ int mknodat(int fd, char *path, mode_t mode, \
 				    dev_t dev); }

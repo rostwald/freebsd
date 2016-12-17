@@ -1280,30 +1280,6 @@ ocreat(td, uap)
  * Create a special file.
  */
 #ifndef _SYS_SYSPROTO_H_
-struct mknod_args {
-	char	*path;
-	int	mode;
-	int	dev;
-};
-#endif
-int
-sys_mknod(td, uap)
-	struct thread *td;
-	register struct mknod_args /* {
-		char *path;
-		int mode;
-		int dev;
-	} */ *uap;
-{
-
-	return (kern_mknodat(td, AT_FDCWD, uap->path, UIO_USERSPACE,
-	    uap->mode, uap->dev));
-}
-
-/*
- * Create a special file.
- */
-#ifndef _SYS_SYSPROTO_H_
 struct mknodat_args {
 	int	fd;
 	char	*path;
@@ -2281,33 +2257,6 @@ cvtstat(st, ost)
 }
 #endif /* COMPAT_43 */
 
-/*
- * Get file status; this version follows links.
- */
-#ifndef _SYS_SYSPROTO_H_
-struct stat_args {
-	char	*path;
-	struct stat *ub;
-};
-#endif
-int
-sys_stat(td, uap)
-	struct thread *td;
-	register struct stat_args /* {
-		char *path;
-		struct stat *ub;
-	} */ *uap;
-{
-	struct stat sb;
-	int error;
-
-	error = kern_statat(td, 0, AT_FDCWD, uap->path, UIO_USERSPACE,
-	    &sb, NULL);
-	if (error == 0)
-		error = copyout(&sb, uap->ub, sizeof (sb));
-	return (error);
-}
-
 #if defined(COMPAT_FREEBSD11)
 void
 freebsd11_cvtstat(struct stat *st, struct freebsd11_stat *ost)
@@ -2460,33 +2409,6 @@ kern_statat(struct thread *td, int flag, int fd, char *path,
 		ktrstat(&sb);
 #endif
 	return (0);
-}
-
-/*
- * Get file status; this version does not follow links.
- */
-#ifndef _SYS_SYSPROTO_H_
-struct lstat_args {
-	char	*path;
-	struct stat *ub;
-};
-#endif
-int
-sys_lstat(td, uap)
-	struct thread *td;
-	register struct lstat_args /* {
-		char *path;
-		struct stat *ub;
-	} */ *uap;
-{
-	struct stat sb;
-	int error;
-
-	error = kern_statat(td, AT_SYMLINK_NOFOLLOW, AT_FDCWD, uap->path,
-	    UIO_USERSPACE, &sb, NULL);
-	if (error == 0)
-		error = copyout(&sb, uap->ub, sizeof (sb));
-	return (error);
 }
 
 #if defined(COMPAT_FREEBSD11)
@@ -4309,31 +4231,6 @@ fail:
 	foffset_unlock(fp, foffset, 0);
 	fdrop(fp, td);
 	return (error);
-}
-
-#ifndef _SYS_SYSPROTO_H_
-struct getdents_args {
-	int fd;
-	char *buf;
-	size_t count;
-};
-#endif
-int
-sys_getdents(td, uap)
-	struct thread *td;
-	register struct getdents_args /* {
-		int fd;
-		char *buf;
-		u_int count;
-	} */ *uap;
-{
-	struct getdirentries_args ap;
-
-	ap.fd = uap->fd;
-	ap.buf = uap->buf;
-	ap.count = uap->count;
-	ap.basep = NULL;
-	return (sys_getdirentries(td, &ap));
 }
 
 /*

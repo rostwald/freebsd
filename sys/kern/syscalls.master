@@ -1000,25 +1000,20 @@
 				    id_t id, const struct \
 				    vm_domain_policy_entry *policy); }
 550	AUE_FSYNC	STD	{ int fdatasync(int fd); }
-551	AUE_STAT	STD	{ int stat(char *path, struct stat *ub); }
-552	AUE_LSTAT	STD	{ int lstat(char *path, struct stat *ub); }
-553	AUE_FSTAT	STD	{ int fstat(int fd, struct stat *sb); }
-554	AUE_FSTATAT	STD	{ int fstatat(int fd, char *path, \
+551	AUE_FSTAT	STD	{ int fstat(int fd, struct stat *sb); }
+552	AUE_FSTATAT	STD	{ int fstatat(int fd, char *path, \
 				    struct stat *buf, int flag); }
-555	AUE_FHSTAT	STD	{ int fhstat(const struct fhandle *u_fhp, \
+553	AUE_FHSTAT	STD	{ int fhstat(const struct fhandle *u_fhp, \
 				    struct stat *sb); }
-556	AUE_GETDIRENTRIES STD	{ ssize_t getdirentries(int fd, char *buf, \
+554	AUE_GETDIRENTRIES STD	{ ssize_t getdirentries(int fd, char *buf, \
 				    size_t count, off_t *basep); }
-557	AUE_O_GETDENTS	STD	{ int getdents(int fd, char *buf, \
-				    size_t count); }
-558	AUE_STATFS	STD	{ int statfs(char *path, struct statfs *buf); }
-559	AUE_FSTATFS	STD	{ int fstatfs(int fd, struct statfs *buf); }
-560	AUE_GETFSSTAT	STD	{ int getfsstat(struct statfs *buf, \
+555	AUE_STATFS	STD	{ int statfs(char *path, struct statfs *buf); }
+556	AUE_FSTATFS	STD	{ int fstatfs(int fd, struct statfs *buf); }
+557	AUE_GETFSSTAT	STD	{ int getfsstat(struct statfs *buf, \
 				    long bufsize, int flags); }
-561	AUE_FHSTATFS	STD	{ int fhstatfs(const struct fhandle *u_fhp, \
+558	AUE_FHSTATFS	STD	{ int fhstatfs(const struct fhandle *u_fhp, \
 				    struct statfs *buf); }
-562	AUE_MKNOD	STD	{ int mknod(char *path, int mode, int dev); }
-563	AUE_MKNODAT	STD	{ int mknodat(int fd, char *path, mode_t mode, \
+559	AUE_MKNODAT	STD	{ int mknodat(int fd, char *path, mode_t mode, \
 				    dev_t dev); }
 
 ; Please copy any additions and changes to the following compatability tables:

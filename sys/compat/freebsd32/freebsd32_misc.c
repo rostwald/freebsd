@@ -1620,19 +1620,6 @@ freebsd32_getdirentries(struct thread *td,
 	return (error);
 }
 
-int
-freebsd32_getdents(struct thread *td,
-    struct freebsd32_getdents_args *uap)
-{
-	struct freebsd32_getdirentries_args ap;
-
-	ap.fd = uap->fd;
-	ap.buf = uap->buf;
-	ap.count = uap->count;
-	ap.basep = NULL;
-	return (freebsd32_getdirentries(td, &ap));
-}
-
 #ifdef COMPAT_FREEBSD6
 /* versions with the 'int pad' argument */
 int
@@ -1845,22 +1832,6 @@ copy_ostat(struct stat *in, struct ostat32 *out)
 }
 #endif
 
-int
-freebsd32_stat(struct thread *td, struct freebsd32_stat_args *uap)
-{
-	struct stat sb;
-	struct stat32 sb32;
-	int error;
-
-	error = kern_statat(td, 0, AT_FDCWD, uap->path, UIO_USERSPACE,
-	    &sb, NULL);
-	if (error)
-		return (error);
-	copy_stat(&sb, &sb32);
-	error = copyout(&sb32, uap->ub, sizeof (sb32));
-	return (error);
-}
-
 #ifdef COMPAT_43
 int
 ofreebsd32_stat(struct thread *td, struct ofreebsd32_stat_args *uap)
@@ -1924,22 +1895,6 @@ freebsd32_fstatat(struct thread *td, struct freebsd32_fstatat_args *uap)
 		return (error);
 	copy_stat(&ub, &ub32);
 	error = copyout(&ub32, uap->buf, sizeof(ub32));
-	return (error);
-}
-
-int
-freebsd32_lstat(struct thread *td, struct freebsd32_lstat_args *uap)
-{
-	struct stat sb;
-	struct stat32 sb32;
-	int error;
-
-	error = kern_statat(td, AT_SYMLINK_NOFOLLOW, AT_FDCWD, uap->path,
-	    UIO_USERSPACE, &sb, NULL);
-	if (error)
-		return (error);
-	copy_stat(&sb, &sb32);
-	error = copyout(&sb32, uap->ub, sizeof (sb32));
 	return (error);
 }
 
