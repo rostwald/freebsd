@@ -33,8 +33,6 @@ __FBSDID("$FreeBSD$");
 #include <dirent.h>
 #include "libc_private.h"
 
-ssize_t	__sys_getdirentries(int, char *, size_t, off_t *);
-
 ssize_t
 getdents(int fd, char *buf, size_t nbytes)
 {
