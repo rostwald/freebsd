@@ -166,9 +166,9 @@ struct stat32 {
 	nlink_t st_nlink;
 	mode_t	st_mode;
 	u_int16_t st_padding0;
-	u_int32_t st_padding1;
 	uid_t	st_uid;
 	gid_t	st_gid;
+	u_int32_t st_padding1;
 	dev_t st_rdev;
 	struct timespec32 st_atim;
 	struct timespec32 st_mtim;
