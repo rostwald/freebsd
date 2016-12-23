@@ -159,6 +159,7 @@ struct stat {
 	__int16_t st_padding0;
 	uid_t	  st_uid;		/* user ID of the file's owner */
 	gid_t	  st_gid;		/* group ID of the file's group */
+	__int32_t st_padding1;
 	dev_t     st_rdev;		/* device type */
 	struct	timespec st_atim;	/* time of last access */
 	struct	timespec st_mtim;	/* time of last data modification */
