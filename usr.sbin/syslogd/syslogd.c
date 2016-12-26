@@ -357,7 +357,7 @@ static void	usage(void);
 static int	validate(struct sockaddr *, const char *);
 static void	unmapped(struct sockaddr *);
 static void	wallmsg(struct filed *, struct iovec *, const int iovlen);
-static int	waitdaemon(int, int, int);
+static int	waitdaemon(int);
 static void	timedout(int);
 static void	increase_rcvbuf(int);
 
@@ -606,7 +606,7 @@ main(int argc, char *argv[])
 	}
 
 	if ((!Foreground) && (!Debug)) {
-		ppid = waitdaemon(0, 0, 30);
+		ppid = waitdaemon(30);
 		if (ppid < 0) {
 			warn("could not become daemon");
 			pidfile_remove(pfh);
@@ -2311,7 +2311,7 @@ markit(void)
  * Set a timer so we don't hang forever if it wedges.
  */
 static int
-waitdaemon(int nochdir, int noclose, int maxwait)
+waitdaemon(int maxwait)
 {
 	int fd;
 	int status;
@@ -2343,15 +2343,13 @@ waitdaemon(int nochdir, int noclose, int maxwait)
 	if (setsid() == -1)
 		return (-1);
 
-	if (!nochdir)
-		(void)chdir("/");
-
-	if (!noclose && (fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
+	(void)chdir("/");
+	if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) != -1) {
 		(void)dup2(fd, STDIN_FILENO);
 		(void)dup2(fd, STDOUT_FILENO);
 		(void)dup2(fd, STDERR_FILENO);
-		if (fd > 2)
-			(void)close (fd);
+		if (fd > STDERR_FILENO)
+			(void)close(fd);
 	}
 	return (getppid());
 }
@@ -2875,9 +2873,8 @@ socksetup(struct peer *pe)
 	for (res = res0; res != NULL; res = res->ai_next) {
 		int s;
 
-		if (res->ai_family == AF_LOCAL)
-			unlink(pe->pe_name);
-		else if (SecureMode > 1) {
+		if (res->ai_family != AF_LOCAL &&
+		    SecureMode > 1) {
 			/* Only AF_LOCAL in secure mode. */
 			continue;
 		}
@@ -2909,26 +2906,36 @@ socksetup(struct peer *pe)
 			error++;
 			continue;
 		}
+
 		/*
-		 * RFC 3164 recommends that client side message
-		 * should come from the privileged syslogd port.
+		 * Bind INET and UNIX-domain sockets.
 		 *
-		 * If the system administrator choose not to obey
+		 * A UNIX-domain socket is always bound to a pathname
+		 * regardless of -N flag.
+		 *
+		 * For INET sockets, RFC 3164 recommends that client
+		 * side message should come from the privileged syslogd port.
+		 *
+		 * If the system administrator chooses not to obey
 		 * this, we can skip the bind() step so that the
 		 * system will choose a port for us.
 		 */
-		if (NoBind == 0) {
+		if (res->ai_family == AF_LOCAL)
+			unlink(pe->pe_name);
+		if (res->ai_family == AF_LOCAL ||
+		    NoBind == 0 || pe->pe_name != NULL) {
 			if (bind(s, res->ai_addr, res->ai_addrlen) < 0) {
 				logerror("bind");
 				close(s);
 				error++;
 				continue;
 			}
-			if (SecureMode == 0)
+			if (res->ai_family == AF_LOCAL ||
+			    SecureMode == 0)
 				increase_rcvbuf(s);
 		}
 		if (res->ai_family == AF_LOCAL &&
-	    	    chmod(pe->pe_name, pe->pe_mode) < 0) {
+		    chmod(pe->pe_name, pe->pe_mode) < 0) {
 			dprintf("chmod %s: %s\n", pe->pe_name,
 			    strerror(errno));
 			close(s);
@@ -2938,7 +2945,7 @@ socksetup(struct peer *pe)
 		dprintf("new socket fd is %d\n", s);
 		listen(s, 5);
 		dprintf("shutdown\n");
-		if (SecureMode) {
+		if (SecureMode || res->ai_family == AF_LOCAL) {
 			/* Forbid communication in secure mode. */
 			if (shutdown(s, SHUT_RD) < 0 &&
 			    errno != ENOTCONN) {
@@ -2946,9 +2953,9 @@ socksetup(struct peer *pe)
 				if (!Debug)
 					die(0);
 			}
-			dprintf("listening on inet socket\n");
+			dprintf("listening on socket\n");
 		} else
-			dprintf("sending on inet socket\n");
+			dprintf("sending on socket\n");
 		addsock(res->ai_addr, res->ai_addrlen,
 		    &(struct socklist){
 			.sl_socket = s,
