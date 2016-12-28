@@ -91,7 +91,7 @@
 				    obreak_args int
 18	AUE_GETFSSTAT	COMPAT4	{ int freebsd32_getfsstat( \
 				    struct statfs32 *buf, long bufsize, \
-				    int flags); }
+				    int mode); }
 19	AUE_LSEEK	COMPAT	{ int freebsd32_lseek(int fd, int offset, \
 				    int whence); }
 20	AUE_GETPID	NOPROTO	{ pid_t getpid(void); }
@@ -715,7 +715,7 @@
 394	AUE_NULL	UNIMPL	mac_syscall
 395	AUE_GETFSSTAT	COMPAT11|NOPROTO	{ int getfsstat( \
 				    struct freebsd11_statfs *buf, \
-				    long bufsize, int flags); }
+				    long bufsize, int mode); }
 396	AUE_STATFS	COMPAT11|NOPROTO	{ int statfs(char *path, \
 				    struct statfs *buf); }
 397	AUE_FSTATFS	COMPAT11|NOPROTO	{ int fstatfs(int fd, \
@@ -1103,7 +1103,7 @@
 				    struct statfs32 *buf); }
 556	AUE_FSTATFS	NOPROTO	{ int fstatfs(int fd, struct statfs32 *buf); }
 557	AUE_GETFSSTAT	NOPROTO	{ int getfsstat(struct statfs32 *buf, \
-				    long bufsize, int flags); }
+				    long bufsize, int mode); }
 558	AUE_FHSTATFS	NOPROTO	{ int fhstatfs(const struct fhandle *u_fhp, \
 				    struct statfs32 *buf); }
 559	AUE_MKNODAT	NOPROTO	{ int mknodat(int fd, char *path, mode_t mode, \
