@@ -1939,6 +1939,7 @@ freebsd32_fhstat(struct thread *td, struct freebsd32_fhstat_args *uap)
 static void
 freebsd11_cvtstat32(struct stat *in, struct freebsd11_stat32 *out)
 {
+
 	CP(*in, *out, st_ino);
 	CP(*in, *out, st_nlink);
 	CP(*in, *out, st_dev);

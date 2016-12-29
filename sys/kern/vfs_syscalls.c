@@ -2268,6 +2268,7 @@ cvtstat(st, ost)
 void
 freebsd11_cvtstat(struct stat *st, struct freebsd11_stat *ost)
 {
+
 	ost->st_dev = st->st_dev;
 	ost->st_ino = st->st_ino;		/* truncate */
 	ost->st_mode = st->st_mode;
@@ -2423,9 +2424,7 @@ kern_statat(struct thread *td, int flag, int fd, char *path,
  * Implementation of the NetBSD [l]stat() functions.
  */
 void
-freebsd11_cvtnstat(sb, nsb)
-	struct stat *sb;
-	struct nstat *nsb;
+freebsd11_cvtnstat(struct stat sb, struct nstat *nsb)
 {
 
 	bzero(nsb, sizeof *nsb);
