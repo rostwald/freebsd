@@ -1,20 +1,7 @@
-lib/libc/gen: scandir_b
-fts, glob
 ABI changes tool
 sysctls
 
-Commit checklist:
-1. lib/libc/gen files must be copied from originals and then patched:
-   fts.c -> fts-compat11.c
-   include/fts.h ->fts-compat11.h
-   ftw.c -> ftw-compat11.c
-   glob.c -> glob-compat11.c
-   include/glob.h -> glob-compat11.h
-   nftw.c -> nftw-compat11.c
-   getmntinfo.c -> getmntinfo-compat11.c
-   include/glob.h -> glob-compat11.h
-   readdir.c -> readdir-compat11.c
-   scandir.c -> scandir-compat11.c
+Commit checklist: see /preapply.sh
 
 After commit checklist:
 1. Regen and commit sys/kern and sys/compat/freebsd32 sysents.
