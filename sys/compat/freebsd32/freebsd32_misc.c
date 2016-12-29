@@ -1807,6 +1807,9 @@ copy_stat(struct stat *in, struct stat32 *out)
 	CP(*in, *out, st_flags);
 	CP(*in, *out, st_gen);
 	TS_CP(*in, *out, st_birthtim);
+	out->st_padding0 = 0;
+	out->st_padding1 = 0;
+	bzero(out->st_spare, sizeof(out->st_spare));
 }
 
 #ifdef COMPAT_43
@@ -1956,6 +1959,10 @@ freebsd11_cvtstat32(struct stat *in, struct freebsd11_stat32 *out)
 	CP(*in, *out, st_flags);
 	CP(*in, *out, st_gen);
 	TS_CP(*in, *out, st_birthtim);
+	out->st_lspare = 0;
+	bzero((char *)&out->st_birthtim + sizeof(out->st_birthtim),
+	    sizeof(*out) - offsetof(struct freebsd11_stat32,
+	    st_birthtim) - sizeof(out->st_birthtim));
 }
 
 int

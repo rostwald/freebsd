@@ -2286,6 +2286,9 @@ freebsd11_cvtstat(struct stat *st, struct freebsd11_stat *ost)
 	ost->st_gen = st->st_gen;
 	ost->st_lspare = 0;
 	ost->st_birthtim = st->st_birthtim;
+	bzero((char *)&ost->st_birthtim + sizeof(ost->st_birthtim),
+	    sizeof(*ost) - offsetof(struct freebsd11_stat,
+	    st_birthtim) - sizeof(ost->st_birthtim));
 }
 
 int
