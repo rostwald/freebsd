@@ -380,12 +380,11 @@ struct kinfo_file {
 			uint32_t	kf_file_fsid_freebsd11;
 			/* File device, FreeBSD 11 compat. */
 			uint32_t	kf_file_rdev_freebsd11;
-			/* File mode, FreeBSD 11 compat. */
-			uint16_t	kf_file_mode_freebsd11;
+			/* File mode. */
+			uint16_t	kf_file_mode;
 			/* Round to 64 bit alignment. */
 			uint16_t	kf_file_pad0;
-			/* File mode. */
-			uint32_t	kf_file_mode;
+			uint32_t	kf_file_pad1;
 		} kf_file;
 		struct {
 			/* Space for future use */
@@ -501,13 +500,11 @@ struct kinfo_vmentry {
 	int	 kve_vn_type;			/* Vnode type. */
 	uint64_t kve_vn_size;			/* File size. */
 	uint32_t kve_vn_rdev_freebsd11;		/* Device id if device. */
-	uint16_t kve_vn_mode_freebsd11;		/* File mode. */
+	uint16_t kve_vn_mode;			/* File mode. */
 	uint16_t kve_status;			/* Status flags. */
 	uint64_t kve_vn_fsid;			/* dev_t of vnode location */
 	uint64_t kve_vn_rdev;			/* Device id if device. */
-	uint32_t kve_vn_mode;			/* File mode. */
-	uint32_t _kve_ispare0;			/* Space for more stuff. */
-	int	 _kve_ispare[6];		/* Space for more stuff. */
+	int	 _kve_ispare[8];		/* Space for more stuff. */
 	/* Truncated before copyout in sysctl */
 	char	 kve_path[PATH_MAX];		/* Path to VM obj, if any. */
 };

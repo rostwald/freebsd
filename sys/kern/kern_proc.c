@@ -2443,8 +2443,6 @@ kern_proc_vmmap_out(struct proc *p, struct sbuf *sb, ssize_t maxlen, int flags)
 					    kve->kve_vn_fsid; /* truncate */
 					kve->kve_vn_mode =
 					    MAKEIMODE(va.va_type, va.va_mode);
-					kve->kve_vn_mode_freebsd11 =
-					    kve->kve_vn_mode; /* truncate */
 					kve->kve_vn_size = va.va_size;
 					kve->kve_vn_rdev = va.va_rdev;
 					kve->kve_vn_rdev_freebsd11 =
