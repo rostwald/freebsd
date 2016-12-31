@@ -354,7 +354,7 @@ soo_fill_kinfo(struct file *fp, struct kinfo_file *kif, struct filedesc *fdp)
 	switch (kif->kf_un.kf_sock.kf_sock_domain0) {
 	case AF_INET:
 	case AF_INET6:
-		if (kif->kf_sock_protocol == IPPROTO_TCP) {
+		if (kif->kf_un.kf_sock.kf_sock_protocol0 == IPPROTO_TCP) {
 			if (so->so_pcb != NULL) {
 				inpcb = (struct inpcb *)(so->so_pcb);
 				kif->kf_un.kf_sock.kf_sock_inpcb =
