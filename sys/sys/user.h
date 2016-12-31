@@ -430,10 +430,12 @@ struct kinfo_file {
 	/* Truncated before copyout in sysctl */
 	char		kf_path[PATH_MAX];	/* Path to file, if any. */
 };
+#ifndef _KERNEL
 #define	kf_vnode_type	kf_un.kf_file.kf_file_type
 #define	kf_sock_domain	kf_un.kf_sock.kf_sock_domain0
 #define	kf_sock_type	kf_un.kf_sock.kf_sock_type0
 #define	kf_sock_protocol	kf_un.kf_sock.kf_sock_protocol0
+#endif
 
 /*
  * The KERN_PROC_VMMAP sysctl allows a process to dump the VM layout of
