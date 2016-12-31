@@ -3663,12 +3663,15 @@ kinfo_to_okinfo(struct kinfo_file *kif, struct kinfo_ofile *okif)
 	    KF_FLAG_APPEND | KF_FLAG_ASYNC | KF_FLAG_FSYNC | KF_FLAG_NONBLOCK |
 	    KF_FLAG_DIRECT | KF_FLAG_HASLOCK);
 	okif->kf_offset = kif->kf_offset;
-	okif->kf_vnode_type = kif->kf_vnode_type;
-	okif->kf_sock_domain = kif->kf_sock_domain;
-	okif->kf_sock_type = kif->kf_sock_type;
-	okif->kf_sock_protocol = kif->kf_sock_protocol;
+	if (kif->kf_type == KF_TYPE_VNODE)
+		okif->kf_vnode_type = kif->kf_un.kf_file.kf_file_type;
+	else
+		okif->kf_vnode_type = KF_VTYPE_VNON;
 	strlcpy(okif->kf_path, kif->kf_path, sizeof(okif->kf_path));
 	if (kif->kf_type == KF_TYPE_SOCKET) {
+		okif->kf_sock_domain = kif->kf_un.kf_sock.kf_sock_domain0;
+		okif->kf_sock_type = kif->kf_un.kf_sock.kf_sock_type0;
+		okif->kf_sock_protocol = kif->kf_un.kf_sock.kf_sock_protocol0;
 		okif->kf_sa_local = kif->kf_un.kf_sock.kf_sa_local;
 		okif->kf_sa_peer = kif->kf_un.kf_sock.kf_sa_peer;
 	} else {

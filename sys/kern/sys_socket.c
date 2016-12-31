@@ -346,11 +346,12 @@ soo_fill_kinfo(struct file *fp, struct kinfo_file *kif, struct filedesc *fdp)
 
 	kif->kf_type = KF_TYPE_SOCKET;
 	so = fp->f_data;
-	kif->kf_sock_domain = so->so_proto->pr_domain->dom_family;
-	kif->kf_sock_type = so->so_type;
-	kif->kf_sock_protocol = so->so_proto->pr_protocol;
+	kif->kf_un.kf_sock.kf_sock_domain0 =
+	    so->so_proto->pr_domain->dom_family;
+	kif->kf_un.kf_sock.kf_sock_type0 = so->so_type;
+	kif->kf_un.kf_sock.kf_sock_protocol0 = so->so_proto->pr_protocol;
 	kif->kf_un.kf_sock.kf_sock_pcb = (uintptr_t)so->so_pcb;
-	switch (kif->kf_sock_domain) {
+	switch (kif->kf_un.kf_sock.kf_sock_domain0) {
 	case AF_INET:
 	case AF_INET6:
 		if (kif->kf_sock_protocol == IPPROTO_TCP) {
