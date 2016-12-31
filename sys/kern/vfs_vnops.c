@@ -2348,7 +2348,7 @@ vn_fill_kinfo_vnode(struct vnode *vp, struct kinfo_file *kif)
 	char *fullpath, *freepath;
 	int error;
 
-	kif->kf_vnode_type = vntype_to_kinfo(vp->v_type);
+	kif->kf_un.kf_file_type = vntype_to_kinfo(vp->v_type);
 	freepath = NULL;
 	fullpath = "-";
 	error = vn_fullpath(curthread, vp, &fullpath, &freepath);

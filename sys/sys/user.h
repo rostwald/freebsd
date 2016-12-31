@@ -342,12 +342,15 @@ struct kinfo_file {
 	int		kf_flags;		/* Flags. */
 	int		kf_pad0;		/* Round to 64 bit alignment. */
 	int64_t		kf_offset;		/* Seek location. */
-	int		kf_vnode_type;		/* Vnode type. */
-	int		kf_sock_domain;		/* Socket domain. */
-	int		kf_sock_type;		/* Socket type. */
-	int		kf_sock_protocol;	/* Socket protocol. */
 	union {
 		struct {
+			uint32_t	kf_spareint;
+			/* Socket domain. */
+			int		kf_sock_domain0;
+			/* Socket type. */
+			int		kf_sock_type0;
+			/* Socket protocol. */
+			int		kf_sock_protocol0;
 			/* Socket address. */
 			struct sockaddr_storage kf_sa_local;
 			/* Peer address. */
@@ -366,7 +369,10 @@ struct kinfo_file {
 			uint32_t	kf_sock_pad0;
 		} kf_sock;
 		struct {
+			/* Vnode type. */
+			int		kf_file_type;
 			/* Space for future use */
+			int		kf_spareint[3];
 			uint64_t	kf_spareint64[30];
 			/* Vnode filesystem id. */
 			uint64_t	kf_file_fsid;
@@ -387,13 +393,13 @@ struct kinfo_file {
 			uint32_t	kf_file_pad1;
 		} kf_file;
 		struct {
-			/* Space for future use */
+			uint32_t	kf_spareint[4];
 			uint64_t	kf_spareint64[32];
 			uint32_t	kf_sem_value;
 			uint16_t	kf_sem_mode;
 		} kf_sem;
 		struct {
-			/* Space for future use */
+			uint32_t	kf_spareint[4];
 			uint64_t	kf_spareint64[32];
 			uint64_t	kf_pipe_addr;
 			uint64_t	kf_pipe_peer;
@@ -402,7 +408,7 @@ struct kinfo_file {
 			uint32_t	kf_pipe_pad0[3];
 		} kf_pipe;
 		struct {
-			/* Space for future use */
+			uint32_t	kf_spareint[4];
 			uint64_t	kf_spareint64[32];
 			uint32_t	kf_pts_dev_freebsd11;
 			uint32_t	kf_pts_pad0;
@@ -411,7 +417,7 @@ struct kinfo_file {
 			uint32_t	kf_pts_pad1[4];
 		} kf_pts;
 		struct {
-			/* Space for future use */
+			uint32_t	kf_spareint[4];
 			uint64_t	kf_spareint64[32];
 			pid_t		kf_pid;
 		} kf_proc;
@@ -424,6 +430,10 @@ struct kinfo_file {
 	/* Truncated before copyout in sysctl */
 	char		kf_path[PATH_MAX];	/* Path to file, if any. */
 };
+#define	kf_vnode_type	kf_un.kf_file.kf_file_type
+#define	kf_sock_domain	kf_un.kf_sock.kf_sock_domain0
+#define	kf_sock_type	kf_un.kf_sock.kf_sock_type0
+#define	kf_sock_protocol	kf_un.kf_sock.kf_sock_protocol0
 
 /*
  * The KERN_PROC_VMMAP sysctl allows a process to dump the VM layout of
