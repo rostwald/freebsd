@@ -390,9 +390,9 @@ struct kinfo_file {
 			/* Space for future use */
 			uint64_t	kf_spareint64[32];
 			uint32_t	kf_sem_value;
-			uint16_t	kf_sem_mode_freebsd11;
+			uint16_t	kf_sem_mode;
 			uint16_t	kf_sem_pad0;
-			uint32_t	kf_sem_mode;
+			uint32_t	kf_sem_pad1;
 		} kf_sem;
 		struct {
 			/* Space for future use */
