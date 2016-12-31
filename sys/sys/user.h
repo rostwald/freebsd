@@ -518,14 +518,15 @@ struct kinfo_vmobject {
 	int	kvo_type;			/* Object type: KVME_TYPE_*. */
 	uint64_t kvo_size;			/* Object size in pages. */
 	uint64_t kvo_vn_fileid;			/* inode number if vnode. */
-	uint32_t kvo_vn_fsid;			/* dev_t of vnode location. */
+	uint32_t kvo_vn_fsid_freebsd11;		/* dev_t of vnode location. */
 	int	kvo_ref_count;			/* Reference count. */
 	int	kvo_shadow_count;		/* Shadow count. */
 	int	kvo_memattr;			/* Memory attribute. */
 	uint64_t kvo_resident;			/* Number of resident pages. */
 	uint64_t kvo_active;			/* Number of active pages. */
 	uint64_t kvo_inactive;			/* Number of inactive pages. */
-	uint64_t _kvo_qspare[8];
+	uint64_t kvo_vn_fsid;
+	uint64_t _kvo_qspare[7];
 	uint32_t _kvo_ispare[8];
 	char	kvo_path[PATH_MAX];		/* Pathname, if any. */
 };
