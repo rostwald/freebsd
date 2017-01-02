@@ -250,6 +250,9 @@ kern_do_statfs(struct thread *td, struct mount *mp, struct statfs *buf)
 	struct statfs *sp;
 	int error;
 
+
+	if (mp == NULL)
+		return (EBADF);
 	error = vfs_busy(mp, 0);
 	vfs_rel(mp);
 	if (error != 0)
@@ -378,8 +381,6 @@ kern_fstatfs(struct thread *td, int fd, struct statfs *buf)
 		vfs_ref(mp);
 	VOP_UNLOCK(vp, 0);
 	fdrop(fp, td);
-	if (mp == NULL)
-		return (EBADF);
 	return (kern_do_statfs(td, mp, buf));
 }
 
