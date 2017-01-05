@@ -433,6 +433,8 @@ kern_getfsstat(struct thread *td, struct statfs **buf, size_t bufsize,
 	case MNT_NOWAIT:
 		break;
 	default:
+		if (bufseg == UIO_SYSSPACE)
+			*buf = NULL;
 		return (EINVAL);
 	}
 restart:
@@ -488,7 +490,7 @@ restart:
 				continue;
 			}
 		}
-		if (sfsp && count < maxcount) {
+		if (sfsp != NULL && count < maxcount) {
 			sp = &mp->mnt_stat;
 			/*
 			 * Set these in case the underlying filesystem
@@ -517,7 +519,8 @@ restart:
 				sptmp->f_fsid.val[0] = sptmp->f_fsid.val[1] = 0;
 				prison_enforce_statfs(td->td_ucred, mp, sptmp);
 				sp = sptmp;
-			}
+			} else
+				sptmp = NULL;
 			if (bufseg == UIO_SYSSPACE) {
 				bcopy(sp, sfsp, sizeof(*sp));
 				free(sptmp, M_STATFS);
@@ -537,7 +540,7 @@ restart:
 		vfs_unbusy(mp);
 	}
 	mtx_unlock(&mountlist_mtx);
-	if (sfsp && count > maxcount)
+	if (sfsp != NULL && count > maxcount)
 		*countp = maxcount;
 	else
 		*countp = count;
