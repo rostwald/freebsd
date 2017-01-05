@@ -439,7 +439,6 @@ kern_getfsstat(struct thread *td, struct statfs **buf, size_t bufsize,
 	}
 restart:
 	maxcount = bufsize / sizeof(struct statfs);
-	sptmp = NULL;
 	if (bufsize == 0) {
 		sfsp = NULL;
 		tofree = NULL;
