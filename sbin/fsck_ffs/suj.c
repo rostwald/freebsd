@@ -1660,10 +1660,11 @@ ino_check(struct suj_ino *sino)
 			    mode, rrec->jr_mode);
 		if (debug)
 			printf("jrefrec: op %d ino %ju, nlink %ju, parent %ju, "
-			    "diroff %d, mode %o, isat %d, isdot %d\n",
+			    "diroff %jd, mode %o, isat %d, isdot %d\n",
 			    rrec->jr_op, (uintmax_t)rrec->jr_ino,
 			    (uintmax_t)rrec->jr_nlink,
-			    (uintmax_t)rrec->jr_parent, rrec->jr_diroff,
+			    (uintmax_t)rrec->jr_parent,
+			    (uintmax_t)rrec->jr_diroff,
 			    rrec->jr_mode, isat, isdot);
 		mode = rrec->jr_mode & IFMT;
 		if (rrec->jr_op == JOP_REMREF)
