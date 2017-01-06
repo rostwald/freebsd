@@ -1968,16 +1968,17 @@ ino_append(union jrec *rec)
 	mvrec = &rec->rec_jmvrec;
 	refrec = &rec->rec_jrefrec;
 	if (debug && mvrec->jm_op == JOP_MVREF)
-		printf("ino move: ino %ju, parent %ju, diroff %d, oldoff %d\n",
+		printf("ino move: ino %ju, parent %ju, "
+		    "diroff %jd, oldoff %jd\n",
 		    (uintmax_t)mvrec->jm_ino, (uintmax_t)mvrec->jm_parent,
-		    mvrec->jm_newoff, mvrec->jm_oldoff);
+		    (uintmax_t)mvrec->jm_newoff, (uintmax_t)mvrec->jm_oldoff);
 	else if (debug &&
 	    (refrec->jr_op == JOP_ADDREF || refrec->jr_op == JOP_REMREF))
 		printf("ino ref: op %d, ino %ju, nlink %ju, "
-		    "parent %ju, diroff %d\n",
+		    "parent %ju, diroff %jd\n",
 		    refrec->jr_op, (uintmax_t)refrec->jr_ino,
 		    (uintmax_t)refrec->jr_nlink,
-		    (uintmax_t)refrec->jr_parent, refrec->jr_diroff);
+		    (uintmax_t)refrec->jr_parent, (uintmax_t)refrec->jr_diroff);
 	sino = ino_lookup(((struct jrefrec *)rec)->jr_ino, 1);
 	sino->si_hasrecs = 1;
 	srec = errmalloc(sizeof(*srec));
