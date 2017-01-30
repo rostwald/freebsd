@@ -160,11 +160,11 @@ SRCS+=	devname-compat11.c \
 	unvis-compat.c
 .endif
 
-.PATH: ${LIBC_SRCTOP}/../../contrib/libc-pwcache
+.PATH: ${SRCTOP}/contrib/libc-pwcache
 SRCS+=	pwcache.c pwcache.h
 
-.PATH: ${LIBC_SRCTOP}/../../contrib/libc-vis
-CFLAGS+=	-I${LIBC_SRCTOP}/../../contrib/libc-vis
+.PATH: ${SRCTOP}/contrib/libc-vis
+CFLAGS+=	-I${SRCTOP}/contrib/libc-vis
 SRCS+=	unvis.c vis.c
 
 MISRCS+=modf.c
