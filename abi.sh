@@ -22,7 +22,7 @@ for obj in $objs; do
     fi
     libname=$(basename ${obj} | sed 's/\.full//')${suffix}
     for x in $exclude_list; do
-	if [ $x \= $libname ] ; then
+	if [ ${x}${suffix} \= $libname ] ; then
 		continue 2
 	fi
     done
