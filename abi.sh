@@ -16,11 +16,11 @@ troubles=
 for obj in $objs; do
 #	    -public-headers ${PRISTINE_BASE}/tmp/usr/include
     if echo $obj | grep world32 ; then
-	suffix=32
+	suffix=-32
     else
 	suffix=""
     fi
-    libname=$(basename ${obj}${suffix} | sed 's/\.full//')
+    libname=$(basename ${obj}$ | sed 's/\.full//')${suffix}
     for x in $exclude_list; do
 	if [ $x \= $libname ] ; then
 		continue 2
