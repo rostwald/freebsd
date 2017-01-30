@@ -21,10 +21,12 @@ for obj in $objs; do
 			continue 2
 		fi
 	done
-	abi-dumper.pl ${PRISTINE_BASE}/${obj} \
+	changed_obj=${CHANGED_BASE}/${obj}
+	pristine_obj=$(echo ${changed_obj} | sed s/ino64/ino64_master/g)
+	abi-dumper.pl ${pristine_obj} \
 	    -lver pristine \
 	    -o tmp/${libname}-pristine.dump
-	abi-dumper.pl ${CHANGED_BASE}/${obj} \
+	abi-dumper.pl ${changed_obj} \
 	    -lver ino64 \
 	    -o tmp/${libname}-ino64.dump
 	if abi-compliance-checker.pl -l ${libname} \
