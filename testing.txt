@@ -1,6 +1,8 @@
 The note explains how to perform useful testing of the ino64 branch,
 beyond usual checks.
 
+1. Motivation.
+
 Main risk of the ino64 change is the ABI breakage.  Due to expansion of
 the basic types dev_t, ino_t and struct dirent, the impact is not limited
 to some part of the system, but affects:
@@ -12,4 +14,42 @@ to some part of the system, but affects:
   was provided using symbol versioning, and libutil, which shlib version
   was bumped.
 
+2. Testing procedure
 
+2.1 New kernel, old world.
+Build and install pristine HEAD world, apply patch and only build and
+install updated kernel. The system must work same as with the pristine
+kernel.
+
+2.2 New kernel, new world, old third-party applications.
+Build and install patched kernel and world.  Applications compiled on the
+pristine HEAD (e.g. installed by pkg from the regular portmgr builds) must
+work without a regression.
+
+2.3 32bit compat
+Same as 2.1 and 2.2, but for 32bit (i386) binaries on the amd64 host.
+Note that big-endian host, like powerpc, might expose additional
+bugs in the 32bit compat with the patch, but the testing is too cumbersome
+to arrange.
+
+2.4 Targeted tests
+Useful programs to check items 2.1, 2.2 and 2.3 are versions of the
+following programs, taken from the pristine system:
+
+  stat(8). Use it on regular file, file in /dev, socket, pipe and so
+  on. For both native and 32bit compat, stat(8) must print reasonable
+  information.
+
+  procstat(1). Use it with the -f option to examine processes files.
+  kinfo(9) data must be returned in the format acceptable for older
+  apps.
+
+  Use pristine find(1) binary with many arbitrary options on system with
+  installed patched world, in particular, libc. Find examines FTS(3),
+  and compat shims in libc are non-trivial.
+
+2.5 NFS server and client test.
+Check that NFS server in the patched kernel operates correctly and without
+performance regressions.  Same for client.
+NFS should be checked for all four combination of patched/unpatched
+kernel server/client, because filehandle format includes inode number.
