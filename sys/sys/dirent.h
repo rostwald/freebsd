@@ -117,8 +117,9 @@ struct freebsd11_dirent {
  * XXX although this macro is in the implementation namespace, it requires
  * a manifest constant that is not.
  */
-#define	_GENERIC_DIRSIZ(dp) \
-    (((sizeof (struct dirent) - (MAXNAMLEN+1)) + ((dp)->d_namlen+1) + 7) &~ 7)
+#define	_GENERIC_DIRLEN(namlen)					\
+	((__offsetof(struct dirent, d_name) + (namlen) + 1 + 7) & ~7)
+#define	_GENERIC_DIRSIZ(dp)	_GENERIC_DIRLEN((dp)->d_namlen)
 #endif /* __BSD_VISIBLE */
 
 #ifdef _KERNEL
