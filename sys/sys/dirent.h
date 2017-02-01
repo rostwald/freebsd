@@ -52,17 +52,23 @@ typedef	__off_t		off_t;
  *
  * A directory entry has a struct dirent at the front of it, containing its
  * inode number, the length of the entry, and the length of the name
- * contained in the entry.  These are followed by the name padded to a 4
+ * contained in the entry.  These are followed by the name padded to a 8
  * byte boundary with null bytes.  All names are guaranteed null terminated.
  * The maximum length of a name in a directory is MAXNAMLEN.
+ *
+ * Explicit pad is added between the last member of the header and
+ * d_name, to avoid having the ABI padding in the end of dirent on
+ * LP64 arches.  There is code depending on d_name being last.  Also,
+ * keeping this pad for ILP32 architectures simplifies compat32 layer.
  */
 
 struct dirent {
 	ino_t      d_fileno;		/* file number of entry */
 	off_t      d_off;		/* directory offset of entry */
 	__uint16_t d_reclen;		/* length of this record */
-	__uint8_t  d_type; 		/* file type, see below */
-	__uint8_t d_namlen;		/* length of string in d_name */
+	__uint8_t  d_type;		/* file type, see below */
+	__uint8_t  d_namlen;		/* length of string in d_name */
+	__uint32_t d_pad0;
 #if __BSD_VISIBLE
 #define	MAXNAMLEN	255
 	char	d_name[MAXNAMLEN + 1];	/* name must be no longer than this */
