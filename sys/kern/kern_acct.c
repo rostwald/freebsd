@@ -339,7 +339,7 @@ acct_disable(struct thread *td, int logging)
 int
 acct_process(struct thread *td)
 {
-	struct acctv2 acct;
+	struct acctv3 acct;
 	struct timeval ut, st, tmp;
 	struct plimit *oldlim;
 	struct proc *p;
@@ -421,7 +421,7 @@ acct_process(struct thread *td)
 	/* Setup ancillary structure fields. */
 	acct.ac_flagx |= ANVER;
 	acct.ac_zero = 0;
-	acct.ac_version = 2;
+	acct.ac_version = 3;
 	acct.ac_len = acct.ac_len2 = sizeof(acct);
 
 	/*
