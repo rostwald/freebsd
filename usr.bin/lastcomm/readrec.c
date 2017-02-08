@@ -125,7 +125,7 @@ readrec_v2(FILE *f, struct acctv3 *av3)
 	struct acctv2 av2;
 	int rv;
 
-	if ((rv = fread_record(&av2, sizeof(*av2), f)) == EOF)
+	if ((rv = fread_record(&av2, sizeof(av2), f)) == EOF)
 		return (EOF);
 	av3->ac_zero = 0;
 	av3->ac_version = 3;
