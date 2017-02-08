@@ -140,7 +140,7 @@ readrec_v2(FILE *f, struct acctv3 *av3)
 	av3->ac_mem = av2.ac_mem;
 	av3->ac_io = av2.ac_io;
 	av3->ac_tty = av2.ac_tty;
-	av3->ac_flagx = av2.ac_flag;
+	av3->ac_flagx = av2.ac_flagx;
 	return (0);
 }
 
