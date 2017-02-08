@@ -100,32 +100,14 @@ static SYSCTL_NODE(_debug, OID_AUTO, rwlock, CTLFLAG_RD, NULL,
 SYSCTL_INT(_debug_rwlock, OID_AUTO, retry, CTLFLAG_RW, &rowner_retries, 0, "");
 SYSCTL_INT(_debug_rwlock, OID_AUTO, loops, CTLFLAG_RW, &rowner_loops, 0, "");
 
-static struct lock_delay_config __read_mostly rw_delay = {
-	.initial	= 1000,
-	.step		= 500,
-	.min		= 100,
-	.max		= 5000,
-};
+static struct lock_delay_config __read_mostly rw_delay;
 
-SYSCTL_INT(_debug_rwlock, OID_AUTO, delay_initial, CTLFLAG_RW, &rw_delay.initial,
-    0, "");
-SYSCTL_INT(_debug_rwlock, OID_AUTO, delay_step, CTLFLAG_RW, &rw_delay.step,
-    0, "");
-SYSCTL_INT(_debug_rwlock, OID_AUTO, delay_min, CTLFLAG_RW, &rw_delay.min,
+SYSCTL_INT(_debug_rwlock, OID_AUTO, delay_base, CTLFLAG_RW, &rw_delay.base,
     0, "");
 SYSCTL_INT(_debug_rwlock, OID_AUTO, delay_max, CTLFLAG_RW, &rw_delay.max,
     0, "");
 
-static void
-rw_delay_sysinit(void *dummy)
-{
-
-	rw_delay.initial = mp_ncpus * 25;
-	rw_delay.step = (mp_ncpus * 25) / 2;
-	rw_delay.min = mp_ncpus * 5;
-	rw_delay.max = mp_ncpus * 25 * 10;
-}
-LOCK_DELAY_SYSINIT(rw_delay_sysinit);
+LOCK_DELAY_SYSINIT_DEFAULT(rw_delay);
 #endif
 
 /*
@@ -283,6 +265,7 @@ void
 _rw_wlock_cookie(volatile uintptr_t *c, const char *file, int line)
 {
 	struct rwlock *rw;
+	uintptr_t tid, v;
 
 	if (SCHEDULER_STOPPED())
 		return;
@@ -296,7 +279,14 @@ _rw_wlock_cookie(volatile uintptr_t *c, const char *file, int line)
 	    ("rw_wlock() of destroyed rwlock @ %s:%d", file, line));
 	WITNESS_CHECKORDER(&rw->lock_object, LOP_NEWORDER | LOP_EXCLUSIVE, file,
 	    line, NULL);
-	__rw_wlock(rw, curthread, file, line);
+	tid = (uintptr_t)curthread;
+	v = RW_UNLOCKED;
+	if (!_rw_write_lock_fetch(rw, &v, tid))
+		_rw_wlock_hard(rw, v, tid, file, line);
+	else
+		LOCKSTAT_PROFILE_OBTAIN_RWLOCK_SUCCESS(rw__acquire, rw,
+		    0, 0, file, line, LOCKSTAT_WRITER);
+
 	LOCK_LOG_LOCK("WLOCK", &rw->lock_object, 0, rw->rw_recurse, file, line);
 	WITNESS_LOCK(&rw->lock_object, LOP_EXCLUSIVE, file, line);
 	TD_LOCKS_INC(curthread);
@@ -322,6 +312,7 @@ __rw_try_wlock(volatile uintptr_t *c, const char *file, int line)
 	if (rw_wlocked(rw) &&
 	    (rw->lock_object.lo_flags & LO_RECURSABLE) != 0) {
 		rw->rw_recurse++;
+		atomic_set_ptr(&rw->rw_lock, RW_LOCK_WRITER_RECURSED);
 		rval = 1;
 	} else
 		rval = atomic_cmpset_acq_ptr(&rw->rw_lock, RW_UNLOCKED,
@@ -355,7 +346,9 @@ _rw_wunlock_cookie(volatile uintptr_t *c, const char *file, int line)
 	WITNESS_UNLOCK(&rw->lock_object, LOP_EXCLUSIVE, file, line);
 	LOCK_LOG_LOCK("WUNLOCK", &rw->lock_object, 0, rw->rw_recurse, file,
 	    line);
-	__rw_wunlock(rw, curthread, file, line);
+
+	_rw_wunlock_hard(rw, (uintptr_t)curthread, file, line);
+
 	TD_LOCKS_DEC(curthread);
 }
 
@@ -440,7 +433,7 @@ __rw_rlock(volatile uintptr_t *c, const char *file, int line)
 			 * if the lock has been unlocked and write waiters
 			 * were present.
 			 */
-			if (atomic_cmpset_acq_ptr(&rw->rw_lock, v,
+			if (atomic_fcmpset_acq_ptr(&rw->rw_lock, &v,
 			    v + RW_ONE_READER)) {
 				if (LOCK_LOG_TEST(&rw->lock_object, 0))
 					CTR4(KTR_LOCK,
@@ -449,7 +442,6 @@ __rw_rlock(volatile uintptr_t *c, const char *file, int line)
 					    (void *)(v + RW_ONE_READER));
 				break;
 			}
-			v = RW_READ_VALUE(rw);
 			continue;
 		}
 #ifdef KDTRACE_HOOKS
@@ -675,7 +667,7 @@ _rw_runlock_cookie(volatile uintptr_t *c, const char *file, int line)
 		 * just drop one and return.
 		 */
 		if (RW_READERS(x) > 1) {
-			if (atomic_cmpset_rel_ptr(&rw->rw_lock, x,
+			if (atomic_fcmpset_rel_ptr(&rw->rw_lock, &x,
 			    x - RW_ONE_READER)) {
 				if (LOCK_LOG_TEST(&rw->lock_object, 0))
 					CTR4(KTR_LOCK,
@@ -684,7 +676,6 @@ _rw_runlock_cookie(volatile uintptr_t *c, const char *file, int line)
 					    (void *)(x - RW_ONE_READER));
 				break;
 			}
-			x = RW_READ_VALUE(rw);
 			continue;
 		}
 		/*
@@ -694,14 +685,13 @@ _rw_runlock_cookie(volatile uintptr_t *c, const char *file, int line)
 		if (!(x & RW_LOCK_WAITERS)) {
 			MPASS((x & ~RW_LOCK_WRITE_SPINNER) ==
 			    RW_READERS_LOCK(1));
-			if (atomic_cmpset_rel_ptr(&rw->rw_lock, x,
+			if (atomic_fcmpset_rel_ptr(&rw->rw_lock, &x,
 			    RW_UNLOCKED)) {
 				if (LOCK_LOG_TEST(&rw->lock_object, 0))
 					CTR2(KTR_LOCK, "%s: %p last succeeded",
 					    __func__, rw);
 				break;
 			}
-			x = RW_READ_VALUE(rw);
 			continue;
 		}
 		/*
@@ -769,8 +759,8 @@ _rw_runlock_cookie(volatile uintptr_t *c, const char *file, int line)
  * read or write lock.
  */
 void
-__rw_wlock_hard(volatile uintptr_t *c, uintptr_t tid, const char *file,
-    int line)
+__rw_wlock_hard(volatile uintptr_t *c, uintptr_t v, uintptr_t tid,
+    const char *file, int line)
 {
 	struct rwlock *rw;
 	struct turnstile *ts;
@@ -779,7 +769,7 @@ __rw_wlock_hard(volatile uintptr_t *c, uintptr_t tid, const char *file,
 	int spintries = 0;
 	int i;
 #endif
-	uintptr_t v, x;
+	uintptr_t x;
 #ifdef LOCK_PROFILING
 	uint64_t waittime = 0;
 	int contested = 0;
@@ -803,13 +793,15 @@ __rw_wlock_hard(volatile uintptr_t *c, uintptr_t tid, const char *file,
 	lock_delay_arg_init(&lda, NULL);
 #endif
 	rw = rwlock2rw(c);
-	v = RW_READ_VALUE(rw);
+	if (__predict_false(v == RW_UNLOCKED))
+		v = RW_READ_VALUE(rw);
 
 	if (__predict_false(lv_rw_wowner(v) == (struct thread *)tid)) {
 		KASSERT(rw->lock_object.lo_flags & LO_RECURSABLE,
 		    ("%s: recursing but non-recursive rw %s @ %s:%d\n",
 		    __func__, rw->lock_object.lo_name, file, line));
 		rw->rw_recurse++;
+		atomic_set_ptr(&rw->rw_lock, RW_LOCK_WRITER_RECURSED);
 		if (LOCK_LOG_TEST(&rw->lock_object, 0))
 			CTR2(KTR_LOCK, "%s: %p recursing", __func__, rw);
 		return;
@@ -825,9 +817,8 @@ __rw_wlock_hard(volatile uintptr_t *c, uintptr_t tid, const char *file,
 #endif
 	for (;;) {
 		if (v == RW_UNLOCKED) {
-			if (_rw_write_lock(rw, tid))
+			if (_rw_write_lock_fetch(rw, &v, tid))
 				break;
-			v = RW_READ_VALUE(rw);
 			continue;
 		}
 #ifdef KDTRACE_HOOKS
@@ -1004,10 +995,14 @@ __rw_wunlock_hard(volatile uintptr_t *c, uintptr_t tid, const char *file,
 
 	rw = rwlock2rw(c);
 
-	if (rw_wlocked(rw) && rw_recursed(rw)) {
-		rw->rw_recurse--;
-		if (LOCK_LOG_TEST(&rw->lock_object, 0))
-			CTR2(KTR_LOCK, "%s: %p unrecursing", __func__, rw);
+	if (!rw_recursed(rw)) {
+		LOCKSTAT_PROFILE_RELEASE_RWLOCK(rw__release, rw,
+		    LOCKSTAT_WRITER);
+		if (_rw_write_unlock(rw, tid))
+			return;
+	} else {
+		if (--(rw->rw_recurse) == 0)
+			atomic_clear_ptr(&rw->rw_lock, RW_LOCK_WRITER_RECURSED);
 		return;
 	}
 
