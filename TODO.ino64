@@ -1,6 +1,5 @@
-ABI changes tool
-sysctls
 update dir(5)
+       acct(5)
 
 Commit checklist: see /preapply.sh
 
