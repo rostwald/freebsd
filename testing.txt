@@ -82,7 +82,16 @@ performance regressions.  Same for client.
 NFS should be checked for all four combination of patched/unpatched
 kernel server/client, because the filehandle format includes inode number.
 
-4.6 Test accounting
+4.6 Other filesystems
+Generally, filesystems should see no change in the system behaviour,
+since patch goal is to provide space to grow in the ABI.  In
+particular, local filesystem layout must stay same.  Of course, it is
+possible that some reliance on the exact sizes of the changed types
+was left unnoticed during the patch review, in which case e.g. on-disk
+format would be broken.  We do not expect this to slip in, but it is
+possible and should be watched for.
+
+4.7 Test accounting
 The process accounting, as documented in acct(5), changed format of
 the records due to dev_t increase.  Verify that the programs like
 sa(8) and accton(8) correctly work with both old and new accounting
