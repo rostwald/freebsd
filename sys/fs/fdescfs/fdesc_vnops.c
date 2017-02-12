@@ -520,7 +520,7 @@ fdesc_readdir(struct vop_readdir_args *ap)
 		case 1: /* `..' */
 			dp->d_fileno = i + FD_ROOT;
 			dp->d_namlen = i + 1;
-			dp->d_reclen = GENERIC_DIRSIZ(dp);
+			dp->d_reclen = UIO_MX;
 			bcopy("..", dp->d_name, dp->d_namlen);
 			dp->d_name[i + 1] = '\0';
 			dp->d_type = DT_DIR;
@@ -529,7 +529,7 @@ fdesc_readdir(struct vop_readdir_args *ap)
 			if (fdp->fd_ofiles[fcnt].fde_file == NULL)
 				break;
 			dp->d_namlen = sprintf(dp->d_name, "%d", fcnt);
-			dp->d_reclen = GENERIC_DIRSIZ(dp);
+			dp->d_reclen = UIO_MX;
 			dp->d_type = DT_CHR;
 			dp->d_fileno = i + FD_DESC;
 			break;
@@ -539,7 +539,7 @@ fdesc_readdir(struct vop_readdir_args *ap)
 			 * And ship to userland
 			 */
 			FILEDESC_SUNLOCK(fdp);
-			error = uiomove(dp, dp->d_reclen, uio);
+			error = uiomove(dp, UIO_MX, uio);
 			if (error)
 				goto done;
 			FILEDESC_SLOCK(fdp);
