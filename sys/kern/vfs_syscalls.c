@@ -3958,6 +3958,7 @@ freebsd11_kern_getdirentries(struct thread *td, int fd, char *ubuf, u_int count,
 	    ucount < count && dp < edp; ) {
 		if (dp->d_reclen == 0)
 			break;
+		MPASS(dp->d_reclen >= _GENERIC_DIRLEN(0));
 		if (dp->d_namlen > sizeof(dstdp.d_name) - 1)
 			continue;
 		dstdp.d_type = dp->d_type;
