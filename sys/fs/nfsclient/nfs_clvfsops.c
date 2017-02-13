@@ -874,7 +874,7 @@ nfs_mount(struct mount *mp)
 	struct sockaddr *nam = NULL;
 	struct vnode *vp;
 	struct thread *td;
-	char hst[MNAMELEN];
+	char *hst;
 	u_char nfh[NFSX_FHMAX], krbname[100], dirpath[100], srvkrbname[100];
 	char *cp, *opt, *name, *secname;
 	int nametimeo = NFS_DEFAULT_NAMETIMEO;
@@ -886,6 +886,7 @@ nfs_mount(struct mount *mp)
 
 	has_nfs_args_opt = 0;
 	has_nfs_from_opt = 0;
+	hst = malloc(MNAMELEN, M_TEMP, M_WAITOK);
 	if (vfs_filteropt(mp->mnt_optnew, nfs_opts)) {
 		error = EINVAL;
 		goto out;
@@ -1324,6 +1325,7 @@ out:
 			mp->mnt_kern_flag |= MNTK_NULL_NOCACHE;
 		MNT_IUNLOCK(mp);
 	}
+	free(hst, M_TEMP);
 	return (error);
 }
 
