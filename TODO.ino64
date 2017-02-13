@@ -1,7 +1,3 @@
-update dir(5)
-       acct(5)
-       statfs(2) MNAMELEN
-
 Commit checklist: see /preapply.sh
 
 After commit checklist:
