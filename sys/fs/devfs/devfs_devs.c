@@ -216,7 +216,7 @@ devfs_newdirent(char *name, int namelen)
 	struct dirent d;
 
 	d.d_namlen = namelen;
-	i = sizeof(*de) + GENERIC_DIRSIZ(&d); 
+	i = sizeof(*de) + GENERIC_DIRSIZ(&d);
 	de = malloc(i, M_DEVFS3, M_WAITOK | M_ZERO);
 	de->de_dirent = (struct dirent *)(de + 1);
 	de->de_dirent->d_namlen = namelen;
