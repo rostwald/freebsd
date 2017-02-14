@@ -56,10 +56,10 @@ typedef	__off_t		off_t;
  * byte boundary with null bytes.  All names are guaranteed null terminated.
  * The maximum length of a name in a directory is MAXNAMLEN.
  *
- * Explicit pad is added between the last member of the header and
- * d_name, to avoid having the ABI padding in the end of dirent on
- * LP64 arches.  There is code depending on d_name being last.  Also,
- * keeping this pad for ILP32 architectures simplifies compat32 layer.
+ * Explicit padding between the last member of the header (d_namelen) and
+ * d_name avoids ABI padding at the end of dirent on LP64 architectures.
+ * There is code depending on d_name being last.  Also, retaining this
+ * padding on ILP32 architectures simplifies the compat32 layer.
  */
 
 struct dirent {
