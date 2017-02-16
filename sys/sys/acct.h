@@ -65,7 +65,7 @@ struct acctv3 {
 	float	  ac_mem;		/* average memory usage */
 	float	  ac_io;		/* count of IO blocks */
 	__dev_t   ac_tty;		/* controlling tty */
-	uint16_t  ac_pad0;
+	uint32_t  ac_pad0;
 	uint16_t  ac_len2;		/* record length */
 	union {
 		uint32_t  ac_align;	/* force v1 compatible alignment */
