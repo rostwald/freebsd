@@ -27,8 +27,6 @@
  * SUCH DAMAGE.
  *
  * from: $OpenBSD: fts.c,v 1.22 1999/10/03 19:22:22 millert Exp $
- * from:
- * $FreeBSD$
  */
 
 #if 0
