@@ -924,7 +924,7 @@ fts_stat(FTS11 *sp, FTSENT11 *p, int follow, int dfd)
 		}
 	} else if (freebsd11_fstatat(dfd, path, sbp, AT_SYMLINK_NOFOLLOW)) {
 		p->fts_errno = errno;
-err:		memset(sbp, 0, sizeof(struct stat));
+err:		memset(sbp, 0, sizeof(*sbp));
 		return (FTS_NS);
 	}
 
@@ -994,14 +994,14 @@ fts_sort(FTS11 *sp, FTSENT11 *head, size_t nitems)
 	if (nitems > sp->fts_nitems) {
 		sp->fts_nitems = nitems + 40;
 		if ((sp->fts_array = reallocf(sp->fts_array,
-		    sp->fts_nitems * sizeof(FTSENT *))) == NULL) {
+		    sp->fts_nitems * sizeof(FTSENT11 *))) == NULL) {
 			sp->fts_nitems = 0;
 			return (head);
 		}
 	}
 	for (ap = sp->fts_array, p = head; p; p = p->fts_link)
 		*ap++ = p;
-	qsort(sp->fts_array, nitems, sizeof(FTSENT *), fts_compar);
+	qsort(sp->fts_array, nitems, sizeof(FTSENT11 *), fts_compar);
 	for (head = *(ap = sp->fts_array); --nitems; ++ap)
 		ap[0]->fts_link = ap[1];
 	ap[0]->fts_link = NULL;
