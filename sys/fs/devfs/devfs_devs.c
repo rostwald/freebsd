@@ -91,7 +91,8 @@ sysctl_devname(SYSCTL_HANDLER_ARGS)
 #ifdef COMPAT_FREEBSD11
 	if (req->newlen == sizeof(ud_compat)) {
 		error = SYSCTL_IN(req, &ud_compat, sizeof(ud_compat));
-		ud = ud_compat == (uint32_t)NODEV ? NODEV : ud_compat;
+		if (error == 0)
+			ud = ud_compat == (uint32_t)NODEV ? NODEV : ud_compat;
 	} else
 #endif
 		error = SYSCTL_IN(req, &ud, sizeof (ud));
