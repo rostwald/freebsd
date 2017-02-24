@@ -55,13 +55,13 @@ pristine HEAD (e.g. installed by pkg from the regular portmgr builds) must
 work without a regression.
 
 4.3 32bit compat.
-Same as 2.1 and 2.2, but for 32bit (i386) binaries on the amd64 host.
+Same as 4.1 and 4.2, but for 32bit (i386) binaries on the amd64 host.
 Note that big-endian host, like powerpc, might expose additional
 bugs in the 32bit compat with the patch, but the testing is too cumbersome
 to arrange.
 
 4.4 Targeted tests.
-Useful programs to check items 2.1, 2.2 and 2.3 are versions of the
+Useful programs to check items 4.1, 4.2 and 4.3 are versions of the
 following programs, taken from the pristine system:
 
   stat(8). Use it on regular file, file in /dev, socket, pipe and so
