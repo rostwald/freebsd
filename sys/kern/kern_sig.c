@@ -1226,6 +1226,19 @@ sys_sigwaitinfo(struct thread *td, struct sigwaitinfo_args *uap)
 	return (error);
 }
 
+static void
+proc_td_siginfo_capture(struct thread *td, siginfo_t *si)
+{
+	struct thread *thr;
+
+	FOREACH_THREAD_IN_PROC(td->td_proc, thr) {
+		if (thr == td)
+			thr->td_si = *si;
+		else
+			thr->td_si.si_signo = 0;
+	}
+}
+
 int
 kern_sigtimedwait(struct thread *td, sigset_t waitset, ksiginfo_t *ksi,
 	struct timespec *timeout)
@@ -1334,8 +1347,10 @@ kern_sigtimedwait(struct thread *td, sigset_t waitset, ksiginfo_t *ksi,
 			ktrpsig(sig, action, &td->td_sigmask, ksi->ksi_code);
 		}
 #endif
-		if (sig == SIGKILL)
+		if (sig == SIGKILL) {
+			proc_td_siginfo_capture(td, &ksi->ksi_info);
 			sigexit(td, sig);
+		}
 	}
 	PROC_UNLOCK(p);
 	return (error);
@@ -1829,33 +1844,43 @@ struct sigqueue_args {
 int
 sys_sigqueue(struct thread *td, struct sigqueue_args *uap)
 {
+	union sigval sv;
+
+	sv.sival_ptr = uap->value;
+
+	return (kern_sigqueue(td, uap->pid, uap->signum, &sv));
+}
+
+int
+kern_sigqueue(struct thread *td, pid_t pid, int signum, union sigval *value)
+{
 	ksiginfo_t ksi;
 	struct proc *p;
 	int error;
 
-	if ((u_int)uap->signum > _SIG_MAXSIG)
+	if ((u_int)signum > _SIG_MAXSIG)
 		return (EINVAL);
 
 	/*
 	 * Specification says sigqueue can only send signal to
 	 * single process.
 	 */
-	if (uap->pid <= 0)
+	if (pid <= 0)
 		return (EINVAL);
 
-	if ((p = pfind(uap->pid)) == NULL) {
-		if ((p = zpfind(uap->pid)) == NULL)
+	if ((p = pfind(pid)) == NULL) {
+		if ((p = zpfind(pid)) == NULL)
 			return (ESRCH);
 	}
-	error = p_cansignal(td, p, uap->signum);
-	if (error == 0 && uap->signum != 0) {
+	error = p_cansignal(td, p, signum);
+	if (error == 0 && signum != 0) {
 		ksiginfo_init(&ksi);
 		ksi.ksi_flags = KSI_SIGQ;
-		ksi.ksi_signo = uap->signum;
+		ksi.ksi_signo = signum;
 		ksi.ksi_code = SI_QUEUE;
 		ksi.ksi_pid = td->td_proc->p_pid;
 		ksi.ksi_uid = td->td_ucred->cr_ruid;
-		ksi.ksi_value.sival_ptr = uap->value;
+		ksi.ksi_value = *value;
 		error = pksignal(p, ksi.ksi_signo, &ksi);
 	}
 	PROC_UNLOCK(p);
@@ -2452,6 +2477,7 @@ sig_suspend_threads(struct thread *td, struct proc *p, int sending)
 
 	PROC_LOCK_ASSERT(p, MA_OWNED);
 	PROC_SLOCK_ASSERT(p, MA_OWNED);
+	MPASS(sending || td == curthread);
 
 	wakeup_swapper = 0;
 	FOREACH_THREAD_IN_PROC(p, td2) {
@@ -2468,10 +2494,9 @@ sig_suspend_threads(struct thread *td, struct proc *p, int sending)
 				 */
 				KASSERT(!TD_IS_SUSPENDED(td2),
 				    ("thread with deferred stops suspended"));
-				if (TD_SBDRY_INTR(td2) && sending) {
+				if (TD_SBDRY_INTR(td2))
 					wakeup_swapper |= sleepq_abort(td2,
 					    TD_SBDRY_ERRNO(td2));
-				}
 			} else if (!TD_IS_SUSPENDED(td2)) {
 				thread_suspend_one(td2);
 			}
@@ -2621,7 +2646,9 @@ reschedule_signals(struct proc *p, sigset_t block, int flags)
 		signotify(td);
 		if (!(flags & SIGPROCMASK_PS_LOCKED))
 			mtx_lock(&ps->ps_mtx);
-		if (p->p_flag & P_TRACED || SIGISMEMBER(ps->ps_sigcatch, sig))
+		if (p->p_flag & P_TRACED ||
+		    (SIGISMEMBER(ps->ps_sigcatch, sig) &&
+		    !SIGISMEMBER(td->td_sigmask, sig)))
 			tdsigwakeup(td, sig, SIG_CATCH,
 			    (SIGISMEMBER(ps->ps_sigintr, sig) ? EINTR :
 			     ERESTART));
@@ -2756,6 +2783,7 @@ issignal(struct thread *td)
 	struct sigqueue *queue;
 	sigset_t sigpending;
 	int sig, prop;
+	ksiginfo_t ksi;
 
 	p = td->td_proc;
 	ps = p->p_sigacts;
@@ -2811,14 +2839,15 @@ issignal(struct thread *td)
 			 * be thrown away.
 			 */
 			queue = &td->td_sigqueue;
-			td->td_dbgksi.ksi_signo = 0;
-			if (sigqueue_get(queue, sig, &td->td_dbgksi) == 0) {
+			ksiginfo_init(&ksi);
+			if (sigqueue_get(queue, sig, &ksi) == 0) {
 				queue = &p->p_sigqueue;
-				sigqueue_get(queue, sig, &td->td_dbgksi);
+				sigqueue_get(queue, sig, &ksi);
 			}
+			td->td_si = ksi.ksi_info;
 
 			mtx_unlock(&ps->ps_mtx);
-			sig = ptracestop(td, sig, &td->td_dbgksi);
+			sig = ptracestop(td, sig, &ksi);
 			mtx_lock(&ps->ps_mtx);
 
 			/* 
@@ -2989,6 +3018,7 @@ postsig(sig)
 		 * the process.  (Other cases were ignored above.)
 		 */
 		mtx_unlock(&ps->ps_mtx);
+		proc_td_siginfo_capture(td, &ksi.ksi_info);
 		sigexit(td, sig);
 		/* NOTREACHED */
 	} else {

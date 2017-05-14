@@ -328,6 +328,8 @@
         ..
         libdevdctl
         ..
+        libkvm
+        ..
         libmp
         ..
         libnv
@@ -335,6 +337,8 @@
         libproc
         ..
         librt
+        ..
+        libsbuf
         ..
         libthr
             dlopen
@@ -608,6 +612,8 @@
         ..
         comm
         ..
+        csplit
+        ..
         cut
         ..
         diff
@@ -639,6 +645,8 @@
         ncal
         ..
         opensm
+        ..
+        pr
         ..
         printf
         ..

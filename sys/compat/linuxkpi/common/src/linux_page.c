@@ -52,7 +52,6 @@ __FBSDID("$FreeBSD$");
 #include <vm/vm_page.h>
 #include <vm/vm_pageout.h>
 #include <vm/vm_pager.h>
-#include <vm/vm_phys.h>
 #include <vm/vm_radix.h>
 #include <vm/vm_reserv.h>
 #include <vm/vm_extern.h>
@@ -66,6 +65,7 @@ __FBSDID("$FreeBSD$");
 #include <linux/slab.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
+#include <linux/preempt.h>
 #include <linux/smp.h>
 #include <linux/vmalloc.h>
 #include <linux/pfn_t.h>
@@ -80,21 +80,8 @@ __FBSDID("$FreeBSD$");
 
 extern u_int	cpu_feature;
 extern u_int	cpu_stdext_feature;
-extern int	linux_skip_prefault;
 
 #if defined(__i386__) || defined(__amd64__)
-static void
-__wbinvd(void *arg)
-{
-	wbinvd();
-}
-
-int
-wbinvd_on_all_cpus(void)
-{
-	return (on_each_cpu(__wbinvd, NULL, 1));
-}
-
 static int
 needs_set_memattr(vm_page_t m, vm_memattr_t attr)
 {
@@ -453,14 +440,16 @@ arch_io_free_memtype_wc(resource_size_t start, resource_size_t size)
 void *
 linux_page_address(struct page *page)
 {
+
+	if (page->object != kmem_object && page->object != kernel_object) {
 #ifdef LINUXKPI_HAVE_DMAP
-	return ((void *)PHYS_TO_DMAP(VM_PAGE_TO_PHYS(page)));
+		return ((void *)PHYS_TO_DMAP(VM_PAGE_TO_PHYS(page)));
 #else
-	if (page->object != kmem_object && page->object != kernel_object)
 		return (NULL);
+#endif
+	}
 	return ((void *)(uintptr_t)(VM_MIN_KERNEL_ADDRESS +
 	    IDX_TO_OFF(page->pindex)));
-#endif
 }
 
 vm_page_t

@@ -55,10 +55,10 @@
 #include <linux/log2.h>
 #include <linux/kconfig.h>
 #include <linux/printk.h>
-#include <linux/stringify.h> 
 
 #include <asm/byteorder.h>
 #include <asm/cpufeature.h>
+#include <asm/smp.h>
 
 #include <machine/stdarg.h>
 

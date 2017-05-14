@@ -244,6 +244,7 @@ dev/hyperv/vmbus/vmbus_br.c				optional	hyperv
 dev/hyperv/vmbus/vmbus_chan.c				optional	hyperv
 dev/hyperv/vmbus/vmbus_et.c				optional	hyperv
 dev/hyperv/vmbus/vmbus_if.m				optional	hyperv
+dev/hyperv/vmbus/vmbus_res.c				optional	hyperv
 dev/hyperv/vmbus/vmbus_xact.c				optional	hyperv
 dev/hyperv/vmbus/i386/hyperv_machdep.c			optional	hyperv
 dev/hyperv/vmbus/i386/vmbus_vector.S			optional	hyperv
@@ -267,6 +268,7 @@ dev/ipmi/ipmi_linux.c		optional ipmi compat_linux
 dev/le/if_le_isa.c		optional le isa
 dev/mse/mse.c			optional mse
 dev/mse/mse_isa.c		optional mse isa
+dev/nctgpio/nctgpio.c		optional nctgpio
 dev/nfe/if_nfe.c		optional nfe pci
 dev/ntb/if_ntb/if_ntb.c		optional if_ntb
 dev/ntb/ntb_transport.c		optional if_ntb
