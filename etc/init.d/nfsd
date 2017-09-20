@@ -7,7 +7,7 @@ depend()
 {
 	need localmount rpcbind mountd gssd
 	use net logger
-	keyword -stop
+	keyword -stop -shutdown
 }
 
 start_pre()

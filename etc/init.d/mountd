@@ -17,7 +17,7 @@ depend()
 {
 	need localmount rpcbind
 	use net logger
-	keyword -stop
+	keyword -stop -shutdown
 }
 
 start_pre()

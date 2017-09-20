@@ -10,4 +10,5 @@ depend()
 	need localmount pf
 	use net
 	before inetd xinetd
+	keyword -shutdown
 }

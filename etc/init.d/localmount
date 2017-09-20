@@ -33,9 +33,8 @@ start()
 			touch "$RC_SVCDIR"/usr_premounted
 		fi
 	fi
-	ebegin "Mounting local filesystems"
+	veinfo "Mounting local filesystems"
 	mount -at "$types" $no_netdev
-	eend $? "Some local filesystem failed to mount"
 	rc=$?
 	if [ -z "$critical_mounts" ]; then
 		rc=0

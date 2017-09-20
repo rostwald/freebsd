@@ -4,6 +4,7 @@ depend()
 {
         provide iscsid
         use net
+	keyword -shutdown
 }
 
 name="iscsid"

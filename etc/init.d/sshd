@@ -18,6 +18,7 @@ depend()
 {
 	use logger dns
 	need net
+	keyword -shutdown
 }
 
 sshd_keygen_alg()

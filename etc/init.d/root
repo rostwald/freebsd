@@ -14,7 +14,7 @@ description="Mount the root fs read/write"
 depend()
 {
 	need fsck
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 start()

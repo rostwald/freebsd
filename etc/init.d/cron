@@ -5,6 +5,7 @@
 depend() {
 	use clock logger
 	need localmount
+	keyword -shutdown
 }
 
 start() {

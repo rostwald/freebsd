@@ -5,7 +5,7 @@ devfs_rulesets="/etc/devfs.rules"
 
 depend() {
         need localmount
-        keyword -jail -prefix -stop
+        keyword -jail -prefix -stop -shutdown
 }
 
 # devfs_rulesets_from_file file
@@ -248,12 +248,7 @@ read_devfs_conf()
 
 start()
 {
-	ebegin "Starting $name"
 	devfs_apply
-	eend $?
+	return $?
 }
 
-stop() {
-	ebegin "Stopping $name"
-	eend $?
-}

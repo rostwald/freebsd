@@ -12,7 +12,7 @@
 depend()
 {
 	before bootmisc logger
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 BSD_sysctl()
@@ -40,9 +40,7 @@ start()
 {
 	local rc=0
 
-	ebegin "Configuring kernel parameters"
 	case "$RC_UNAME" in
 	*BSD|GNU) BSD_sysctl; rc=$? ;;
 	esac
-	eend $rc "Unable to configure some kernel parameters"
 }

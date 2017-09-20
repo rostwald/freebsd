@@ -24,7 +24,7 @@ fi
 depend()
 {
 	provide clock
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 start()

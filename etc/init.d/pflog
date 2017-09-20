@@ -24,7 +24,7 @@ depend()
     provide pflog
     need localmount network
     before pf
-    keyword -jail
+    keyword -jail -shutdown
 }
 
 execution_sequence()
