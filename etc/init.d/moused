@@ -37,8 +37,8 @@ start()
 		for dev in /dev/psm[0-9]* /dev/ums[0-9]*; do
 			[ -c "$dev" ] || continue
 			[ -e /var/run/moused-"${dev##*/}".pid ] && continue
-			ln -fs /etc/init.d/moused /etc/init.d/moused.${dev##*/}
-			/sbin/service moused.${dev##*/} start 2>/dev/null
+			ln -s /etc/init.d/moused /etc/init.d/moused.${dev##*/} 2>/dev/null
+			/sbin/service moused.${dev##*/} start >/dev/null
 		done
 		if [ $founddev ] ; then
 			return 0
@@ -87,7 +87,7 @@ stop()
 		for dev in /dev/psm[0-9]* /dev/ums[0-9]*; do
 			[ -c "$dev" ] || continue
 			[ -e /var/run/moused-"${dev##*/}".pid ] || continue
-			ln -fs /etc/init.d/moused /etc/init.d/moused.${dev##*/}
+			ln -s /etc/init.d/moused /etc/init.d/moused.${dev##*/} 2>/dev/null
 			/sbin/service moused.${dev##*/} stop
 		done
 		return 0
