@@ -27,4 +27,5 @@ depend()
 	need localmount
 	after bootmisc
 	need net
+	keyword -shutdown
 }

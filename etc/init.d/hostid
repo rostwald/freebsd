@@ -16,7 +16,7 @@ depend()
 {
 	use root
 	before devd net
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 _set()

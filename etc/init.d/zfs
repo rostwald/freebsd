@@ -6,7 +6,7 @@
 depend()
 {
 	before bootmisc logger network
-	keyword -jail -prefix -stop
+	keyword -jail -prefix -stop -shutdown
 }
 
 ZFS="/sbin/zfs"

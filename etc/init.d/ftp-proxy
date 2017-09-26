@@ -17,4 +17,5 @@ depend()
 {
 	need localmount pf
 	use net
+	keyword -shutdown
 }

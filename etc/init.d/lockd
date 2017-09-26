@@ -9,4 +9,5 @@ depend()
 	need localmount rpcbind statd
 	use net logger dns
 	before inetd xinetd
+	keyword -shutdown
 }

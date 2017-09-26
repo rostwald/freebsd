@@ -10,9 +10,10 @@
 # except according to the terms contained in the LICENSE file.
 
 command=/usr/sbin/syslogd
-command_args="$syslogd_args ${syslogd_flags}"
+command_args="-F $syslogd_args ${syslogd_flags}"
 pidfile=/var/run/syslog.pid
 name="System Logger Daemon"
+supervisor=supervise-daemon
 
 depend()
 {
@@ -20,5 +21,5 @@ depend()
 	use net newsyslog
 	need localmount
 	after bootmisc root zfs
-	keyword -prefix
+	keyword -prefix -shutdown
 }

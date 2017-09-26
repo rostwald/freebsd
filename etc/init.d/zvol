@@ -6,7 +6,7 @@
 depend()
 {
 	after zfs
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 ZFS="/sbin/zfs"

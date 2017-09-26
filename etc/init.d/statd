@@ -17,4 +17,5 @@ depend()
 {
 	need localmount rpcbind
 	use net logger dns
+	keyword -shutdown
 }

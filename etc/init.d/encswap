@@ -4,6 +4,7 @@
 
 depend() {
 	before swap
+	keyword -shutdown
 }
 
 start() {

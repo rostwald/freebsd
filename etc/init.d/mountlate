@@ -11,6 +11,11 @@
 name="mountlate"
 desc="Mount filesystems with \"late\" option from /etc/fstab"
 
+depend()
+{
+	keyword -shutdown
+}
+
 start()
 {
 	local err latefs

@@ -5,7 +5,7 @@ name="abi"
 depend()
 {
 	before bootmisc logger
-	keyword -stop
+	keyword -stop -shutdown
 }
 
 sysv_start()
@@ -54,7 +54,7 @@ start()
 	yesno linux_enable && linux_start
 	yesno svr4_enable && svr4_start
 
-	einfo "Additional ABI support: $ABIS"
+	veinfo "Additional ABI support: $ABIS"
 	return 0
 }
 

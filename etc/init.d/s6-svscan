@@ -17,6 +17,7 @@ pidfile=/var/run/s6-svscan.pid
 depend()
 {
 	need localmount
+	keyword -shutdown
 }
 
 start_pre()

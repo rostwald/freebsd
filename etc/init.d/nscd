@@ -20,6 +20,7 @@ depend() {
 	need localmount
 	use net dns ldap ypbind
 	after bootmisc
+	keyword -shutdown
 }
 
 flush() {

@@ -14,7 +14,7 @@ description="Loads a user defined list of kernel modules."
 depend()
 {
 	before sysctl
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 FreeBSD_modules()

@@ -6,4 +6,5 @@ name="Generic Security Services Daemon"
 depend()
 {
 	need localmount
+	keyword -shutdown
 }

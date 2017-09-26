@@ -19,6 +19,7 @@ depend()
 	need localmount
 	use logger
 	before inetd xinetd
+	keyword -shutdown
 }
 
 start_pre()

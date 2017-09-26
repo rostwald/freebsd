@@ -16,7 +16,7 @@ depend()
 {
 	need localmount
 	after root
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 save_seed()
@@ -37,9 +37,8 @@ start()
 {
 	[ -c /dev/urandom ] || return
 	if [ -f "$urandom_seed" ]; then
-		ebegin "Initializing random number generator"
+		veinfo "Initializing random number generator"
 		cat "$urandom_seed" > /dev/urandom
-		eend $? "Error initializing random number generator"
 	fi
 	rm -f "$urandom_seed" && save_seed
 	return 0
@@ -47,7 +46,6 @@ start()
 
 stop()
 {
-	ebegin "Saving random seed"
+	veinfo "Saving random seed"
 	save_seed
-	eend $? "Failed to save random seed"
 }
