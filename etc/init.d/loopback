@@ -13,7 +13,7 @@ description="Configures the loopback interface."
 
 depend()
 {
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 start()

@@ -37,7 +37,7 @@ hcseriald="${bluetooth_hcseriald:-/usr/sbin/hcseriald}"
 depend()
 {
 	need localmount
-	keyword -jail
+	keyword -jail -shutdown
 }
 
 

@@ -7,6 +7,7 @@ depend()
 	need localmount nfsclient automountd autounmountd
 	use net logger dns
 	before inetd xinetd
+	keyword -shutdown
 }
 
 start()

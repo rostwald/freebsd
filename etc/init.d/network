@@ -45,7 +45,7 @@ depend()
         provide net
         need localmount
         after bootmisc modules
-	keyword -jail -prefix -vserver -stop
+	keyword -jail -prefix -vserver -stop -shutdown
 }
 
 start()

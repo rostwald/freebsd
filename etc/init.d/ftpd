@@ -9,5 +9,5 @@ depend()
 {
 	need localmount
 	use net logger
-	keyword -stop
+	keyword -stop -shutdown
 }

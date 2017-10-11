@@ -19,7 +19,7 @@ depend()
 {
 	provide net
 	use network
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 pre_flight_checks()
@@ -60,7 +60,7 @@ do_routes()
 	local xtra= family=
 	[ "$RC_UNAME" != Linux ] && xtra=-q
 
-	ebegin "$1 static routes"
+	vebegin "$1 static routes"
 	eindent
 	pre_flight_checks
 	dump_args | while read args; do
@@ -95,7 +95,7 @@ do_routes()
 		esac
 	done
 	eoutdent
-	eend 0
+	veend 0
 }
 
 start()

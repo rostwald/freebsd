@@ -18,13 +18,11 @@ depend()
 {
 	need localmount
 	after root zfs
-	keyword -prefix -shutdown -stop
+	keyword -prefix -shutdown -stop -shutdown
 }
 
 start()
 {
-	ebegin "Creating and/or trimming log files"
 	${command} ${newsyslog_flags}
 	newsyslog -CCN
-	eend $?
 }

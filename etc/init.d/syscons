@@ -11,32 +11,29 @@
 
 depend() {
 	need localmount
-	keyword -jail -prefix
+	keyword -jail -prefix -shutdown
 }
 
 start() {
 	if [ -n "$allscreen_flags" ]; then
-		ebegin "Setting mode to $allscreen_flags for all screens"
+		veinfo "Setting mode to $allscreen_flags for all screens"
 		for v in /dev/ttyv*; do
 			vidcontrol $allscreen_flags <$v
 		done
-		eend $?
 	fi
 
 	if [ -n "$keymap" -a "$keymap" != "NO" ]; then
-		ebegin "Setting keymap to $keymap"
+		veinfo "Setting keymap to $keymap"
 		kbdcontrol -l $keymap </dev/console
-		eend $?
 	fi
 
 	if [ -n "$keyrate" -a "$keyrate" != "NO" ]; then
-		ebegin "Setting keyrate to $keyrate"
+		veinfo "Setting keyrate to $keyrate"
 		kbdcontrol -r $keyrate </dev/console
-		eend $?
 	fi
 
 	if [ -n "$keychange" -a "$keychange" != "NO" ]; then
-		ebegin "Changing function keys"
+		veinfo "Changing function keys"
 		eval set -- "$keychange"
 		eindent
 		while [ $# -gt 0 ]; do
@@ -49,25 +46,22 @@ start() {
 	fi
 
 	if [ -n "$cursor" -a "$cursor" != "NO" ]; then
-		ebegin "Setting cursor"
+		veinfo "Setting cursor"
 		vidcontrol -c $cursor
-		eend $?
 	fi
 
 	local v= f=
 	for v in font8x16 font8x14 font8x8; do
 		eval f=\$$v
 		if [ -n "$f" -a "$f" != "NO" ]; then
-			ebegin "Setting font $f"
+			veinfo "Setting font $f"
 			vidcontrol -f ${v##font} $f
-			eend $?
 		fi
 	done
 
 	if [ -n "$blanktime" -a "$blanktime" != "NO" ]; then
-		ebegin "Setting blanktime"
+		veinfo "Setting blanktime"
 		vidcontrol -t $blanktime
-		eend $?
 	fi
 
 	if [ -n "$saver" -a "$saver" != "NO" ]; then
@@ -79,11 +73,10 @@ start() {
 	fi
 
 	if [ -n "$kbdflags" -a "$kbdflags" != "NO" ]; then
-		ebegin "Setting keyboard flags for all screens"
+		veinfo "Setting keyboard flags for all screens"
 		for v in /dev/ttyv*; do
 			kbdcontrol $kbdflags <$v
 		done
-		eend $?
 	fi
 
 	return 0

@@ -6,6 +6,7 @@ depend()
 {
 	need localmount nfsclient rpcbind
 	use net logger
+	keyword -shutdown
 }
 
 start_pre()

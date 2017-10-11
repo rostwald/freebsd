@@ -11,6 +11,7 @@ description_rotate_log="Rotate the accounting logs"
 depend()
 {
 	need localmount
+	keyword -shutdown
 }
 
 start()

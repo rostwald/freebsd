@@ -12,4 +12,5 @@ depend()
         need localmount
         use net logger dns
         before inetd xinetd
+	keyword -shutdown
 }
